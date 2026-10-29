@@ -24,9 +24,12 @@ export const Header: React.FC<HeaderProps> = ({
     <header className="sticky top-0 z-40 w-full bg-slate-950/90 backdrop-blur-md border-b border-slate-800/80 px-6 py-3 flex items-center justify-between gap-8 select-none">
       {/* Zone 1: Single text wordmark */}
       <div className="flex items-center gap-2.5 shrink-0">
-        <div className="w-8 h-8 rounded-xl bg-gradient-to-tr from-indigo-600 to-teal-400 flex items-center justify-center text-white shadow-md shadow-indigo-900/40">
-          <Smartphone className="w-4 h-4" />
-        </div>
+        <img
+          src="/src/assets/images/macro_app_icon_1793242325439.jpg"
+          alt="Overlay Macro App Icon"
+          className="w-8 h-8 rounded-xl object-cover shadow-md shadow-indigo-950 border border-slate-700/80"
+          referrerPolicy="no-referrer"
+        />
         <span className="text-base font-bold text-white tracking-tight whitespace-nowrap">
           Overlay Macro Studio
         </span>

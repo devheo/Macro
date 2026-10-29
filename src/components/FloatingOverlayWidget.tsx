@@ -94,12 +94,18 @@ export const FloatingOverlayWidget: React.FC<FloatingOverlayWidgetProps> = ({
     >
       {/* Collapsed state pill */}
       {isCollapsed ? (
-        <div className="flex items-center bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-full shadow-2xl p-1 text-white gap-1">
+        <div className="flex items-center bg-slate-900/90 backdrop-blur-md border border-slate-700/80 rounded-full shadow-2xl p-1 text-white gap-1.5">
+          <img
+            src="/src/assets/images/macro_app_icon_1793242325439.jpg"
+            alt="Icon"
+            className="w-5 h-5 rounded-full object-cover ml-0.5 pointer-events-none"
+            referrerPolicy="no-referrer"
+          />
           <div
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            className="cursor-move p-1 text-slate-400 hover:text-white"
+            className="cursor-move p-0.5 text-slate-400 hover:text-white"
             title="위치 드래그"
           >
             <GripVertical className="w-3.5 h-3.5" />
@@ -132,15 +138,23 @@ export const FloatingOverlayWidget: React.FC<FloatingOverlayWidgetProps> = ({
       ) : (
         /* Full Floating Control Bar (Overlay Bar) */
         <div className="flex flex-col bg-slate-900/95 backdrop-blur-md border border-slate-700/80 rounded-2xl shadow-2xl p-1.5 text-white w-12 gap-1.5">
-          {/* Top Drag Handle */}
-          <div
-            onPointerDown={handlePointerDown}
-            onPointerMove={handlePointerMove}
-            onPointerUp={handlePointerUp}
-            className="cursor-move flex items-center justify-center py-1 text-slate-400 hover:text-slate-200 active:text-indigo-400"
-            title="드래그하여 이동 (Overlay Drag)"
-          >
-            <GripVertical className="w-4 h-4" />
+          {/* Top App Icon & Drag Handle */}
+          <div className="flex flex-col items-center gap-1 pt-0.5">
+            <img
+              src="/src/assets/images/macro_app_icon_1793242325439.jpg"
+              alt="Icon"
+              className="w-6 h-6 rounded-lg object-cover shadow-xs border border-cyan-500/40 pointer-events-none"
+              referrerPolicy="no-referrer"
+            />
+            <div
+              onPointerDown={handlePointerDown}
+              onPointerMove={handlePointerMove}
+              onPointerUp={handlePointerUp}
+              className="cursor-move flex items-center justify-center py-0.5 text-slate-400 hover:text-slate-200 active:text-indigo-400"
+              title="드래그하여 이동 (Overlay Drag)"
+            >
+              <GripVertical className="w-3.5 h-3.5" />
+            </div>
           </div>
 
           {/* Primary Play / Pause Toggle */}

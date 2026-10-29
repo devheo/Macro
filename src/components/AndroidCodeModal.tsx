@@ -209,6 +209,36 @@ export const AndroidCodeModal: React.FC<AndroidCodeModalProps> = ({
         <div className="flex-1 overflow-y-auto p-5">
           {activeTab === 'overview' ? (
             <div className="space-y-6 max-w-3xl text-sm leading-relaxed text-slate-300">
+              {/* Slick App Icon Showcase Card */}
+              <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 flex flex-col sm:flex-row items-center gap-4">
+                <div className="relative group shrink-0">
+                  <img
+                    src="/src/assets/images/macro_app_icon_1793242325439.jpg"
+                    alt="공식 앱 아이콘"
+                    className="w-20 h-20 rounded-2xl object-cover shadow-xl shadow-cyan-950/50 border border-cyan-500/30 ring-2 ring-cyan-400/20"
+                    referrerPolicy="no-referrer"
+                  />
+                  <div className="absolute -bottom-1 -right-1 px-1.5 py-0.5 rounded bg-cyan-950 border border-cyan-500/40 text-[9px] font-mono text-cyan-300">
+                    HD
+                  </div>
+                </div>
+
+                <div className="space-y-1 text-center sm:text-left">
+                  <div className="flex items-center justify-center sm:justify-start gap-2">
+                    <span className="font-bold text-white text-sm">✨ 공식 앱 아이콘 (Mipmap & Adaptive Icon)</span>
+                    <span className="text-[10px] text-emerald-400 bg-emerald-950/60 px-2 py-0.5 rounded border border-emerald-800 font-mono">
+                      적용 완료
+                    </span>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    다크 티타늄 메탈릭 배경에 네온 사이언 & 일렉트릭 바이올렛 터치 타깃 조준점과 펄스 링이 새겨진 고해상도 앱 아이콘입니다.
+                  </p>
+                  <p className="text-[11px] text-slate-500 font-mono">
+                    경로: <code className="text-indigo-300">res/mipmap-anydpi-v26/ic_launcher.xml</code> 및 <code className="text-indigo-300">mipmap-xxxhdpi/ic_launcher.png</code>
+                  </p>
+                </div>
+              </div>
+
               <div className="p-4 rounded-xl bg-indigo-950/30 border border-indigo-500/20 text-indigo-200">
                 <h3 className="font-bold text-white text-base mb-1">
                   안드로이드에서 '앱 위에 얹어서 터치하는 매크로'의 핵심 3대 기술

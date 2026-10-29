@@ -217,6 +217,92 @@ dependencies {
     android:accessibilityFlags="flagDefault|flagRequestFilterKeyEvents" />`
   );
 
+  // App Icon: Adaptive Icon (API 26+)
+  const mipmapFolder = resFolder?.folder('mipmap-anydpi-v26');
+  mipmapFolder?.file(
+    'ic_launcher.xml',
+    `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>`
+  );
+
+  mipmapFolder?.file(
+    'ic_launcher_round.xml',
+    `<?xml version="1.0" encoding="utf-8"?>
+<adaptive-icon xmlns:android="http://schemas.android.com/apk/res/android">
+    <background android:drawable="@drawable/ic_launcher_background" />
+    <foreground android:drawable="@drawable/ic_launcher_foreground" />
+</adaptive-icon>`
+  );
+
+  // App Icon Drawables: Background & Foreground
+  const drawableFolder = resFolder?.folder('drawable');
+  drawableFolder?.file(
+    'ic_launcher_background.xml',
+    `<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:fillColor="#0B0F19"
+        android:pathData="M0,0h108v108h-108z" />
+    <path
+        android:fillColor="#151C2C"
+        android:pathData="M54,14 A40,40 0 1,1 53.99,14 Z" />
+</vector>`
+  );
+
+  drawableFolder?.file(
+    'ic_launcher_foreground.xml',
+    `<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <path
+        android:strokeColor="#A855F7"
+        android:strokeWidth="2.5"
+        android:strokeAlpha="0.85"
+        android:pathData="M54,26 A28,28 0 1,1 53.99,26 Z" />
+    <path
+        android:strokeColor="#06B6D4"
+        android:strokeWidth="2.5"
+        android:pathData="M54,34 A20,20 0 1,1 53.99,34 Z" />
+    <path
+        android:strokeColor="#C084FC"
+        android:strokeWidth="3.5"
+        android:pathData="M54,46 A8,8 0 1,1 53.99,46 Z" />
+    <path
+        android:fillColor="#22D3EE"
+        android:pathData="M54,52 A2,2 0 1,1 53.99,52 Z" />
+    <path
+        android:strokeColor="#22D3EE"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M24,54 L44,54" />
+    <path
+        android:strokeColor="#22D3EE"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M64,54 L84,54" />
+    <path
+        android:strokeColor="#06B6D4"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M54,24 L54,44" />
+    <path
+        android:strokeColor="#06B6D4"
+        android:strokeWidth="2.5"
+        android:strokeLineCap="round"
+        android:pathData="M54,64 L54,84" />
+</vector>`
+  );
+
   // Layouts
   const layoutFolder = resFolder?.folder('layout');
   layoutFolder?.file(
