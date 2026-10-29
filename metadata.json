@@ -1,0 +1,6 @@
+{
+  "name": "Android Overlay Macro Studio",
+  "description": "안드로이드 플로팅 오버레이 매크로 스튜디오: 정해진 초마다 클릭, 주기적 패턴 제스처, 오버레이 컨트롤러 및 네이티브 안드로이드 소스코드 생성기",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
