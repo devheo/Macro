@@ -57,12 +57,13 @@ class MacroAccessibilityService : AccessibilityService() {
     fun clickAt(x: Float, y: Float, durationMs: Long = 50L, callback: (() -> Unit)? = null) {
         val clickPath = Path().apply {
             moveTo(x, y)
+            lineTo(x + 1f, y + 1f) // 필수: 제스처 엔진에 터치 모션 이벤트(DOWN/UP) 강제 발생
         }
 
-        val stroke = GestureDescription.StrokeDescription(clickPath, 0, durationMs)
+        val stroke = GestureDescription.StrokeDescription(clickPath, 0, durationMs.coerceAtLeast(30L))
         val gesture = GestureDescription.Builder().addStroke(stroke).build()
 
-        dispatchGesture(gesture, object : GestureResultCallback() {
+        val dispatched = dispatchGesture(gesture, object : GestureResultCallback() {
             override fun onCompleted(gestureDescription: GestureDescription?) {
                 super.onCompleted(gestureDescription)
                 Log.d("MacroService", "클릭 완료: ($x, $y)")
@@ -71,9 +72,15 @@ class MacroAccessibilityService : AccessibilityService() {
 
             override fun onCancelled(gestureDescription: GestureDescription?) {
                 super.onCancelled(gestureDescription)
-                Log.e("MacroService", "클릭 취소됨")
+                Log.w("MacroService", "클릭 취소됨 ($x, $y) - 루프 동결 방지를 위해 다음 단계로 진행")
+                callback?.invoke()
             }
         }, null)
+
+        if (!dispatched) {
+            Log.e("MacroService", "dispatchGesture 호출 실패 (다른 제스처 실행 중이거나 권한 문제)")
+            handler.postDelayed({ callback?.invoke() }, 500L)
+        }
     }
 
     /**
@@ -93,10 +100,10 @@ class MacroAccessibilityService : AccessibilityService() {
             lineTo(endX, endY)
         }
 
-        val stroke = GestureDescription.StrokeDescription(swipePath, 0, durationMs)
+        val stroke = GestureDescription.StrokeDescription(swipePath, 0, durationMs.coerceAtLeast(100L))
         val gesture = GestureDescription.Builder().addStroke(stroke).build()
 
-        dispatchGesture(gesture, object : GestureResultCallback() {
+        val dispatched = dispatchGesture(gesture, object : GestureResultCallback() {
             override fun onCompleted(gestureDescription: GestureDescription?) {
                 super.onCompleted(gestureDescription)
                 Log.d("MacroService", "스와이프 완료: ($startX, $startY) -> ($endX, $endY)")
@@ -105,9 +112,14 @@ class MacroAccessibilityService : AccessibilityService() {
 
             override fun onCancelled(gestureDescription: GestureDescription?) {
                 super.onCancelled(gestureDescription)
-                Log.e("MacroService", "스와이프 취소됨")
+                Log.w("MacroService", "스와이프 취소됨")
+                callback?.invoke()
             }
         }, null)
+
+        if (!dispatched) {
+            handler.postDelayed({ callback?.invoke() }, 500L)
+        }
     }
 
     /**

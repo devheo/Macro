@@ -120,8 +120,11 @@ export default function App() {
           return;
         }
 
-        // Loop delay
-        const loopDelay = Math.max(50, currentScript.loopIntervalMs / currentScript.speedMultiplier);
+        // 단일 타깃 액션의 경우 액션 자체 지연시간에서 이미 주기가 소화되었으므로 중복 대기 방지
+        const loopDelay = actions.length === 1
+          ? 0
+          : Math.max(50, currentScript.loopIntervalMs / currentScript.speedMultiplier);
+
         timerRef.current = setTimeout(() => {
           if (isRunningRef.current) {
             executeStep(0, nextLoop);
@@ -161,11 +164,12 @@ export default function App() {
           setRipples((prev) => prev.filter((r) => r.id !== rippleId));
         }, 500);
 
-        // Schedule next action
-        const delay = Math.max(
-          50,
-          (tapAct.durationMs + tapAct.delayAfterMs) / currentScript.speedMultiplier
-        );
+        // Schedule next action (단일 타깃이면 loopIntervalMs 우선 적용)
+        const intervalMs = actions.length === 1
+          ? (currentScript.loopIntervalMs || tapAct.delayAfterMs)
+          : (tapAct.durationMs + tapAct.delayAfterMs);
+        const delay = Math.max(50, intervalMs / currentScript.speedMultiplier);
+
         timerRef.current = setTimeout(() => {
           executeStep(actionIndex + 1, loopIndex);
         }, delay);
@@ -287,6 +291,7 @@ export default function App() {
   // Add Tap Point Pin
   const handleAddTapPoint = () => {
     const tapCount = currentScript.actions.filter((a) => a.type === 'tap').length + 1;
+    const intervalToUse = currentScript.loopIntervalMs || 3000;
     const newTap: TapAction = {
       id: `act-tap-${Date.now()}`,
       name: `클릭 타깃 핀 #${tapCount}`,
@@ -295,7 +300,7 @@ export default function App() {
       x: 50,
       y: 50 + (tapCount % 3) * 10,
       durationMs: 50,
-      delayAfterMs: 1000,
+      delayAfterMs: intervalToUse,
       randomOffsetPx: 5,
     };
     setCurrentScript((prev) => ({

@@ -25,8 +25,11 @@ import kotlin.random.Random
 
 /**
  * FloatingOverlayService:
- * 다른 앱 위에 항상 떠 있는 플로팅 툴바 및 타깃 핀(①, ②, ③)을 관리하고,
- * 온스크린 플로팅 설정 다이얼로그(⚙️)를 통해 앱으로 돌아가지 않고도 화면 위에서 즉시 매크로 주기를 변경합니다.
+ * 다른 앱 위에 항상 떠 있는 플로팅 툴바 및 타깃 핀(①, ②, ③)을 관리합니다.
+ *
+ * [핵심 터치 관통(Click-Through) 해결]:
+ * 재생(Play) 중에는 타깃 핀에 FLAG_NOT_TOUCHABLE 플래그를 적용하여,
+ * 접근성 서비스가 쏘는 터치가 핀에 가로막히지 않고 밑에 있는 게임/앱 화면으로 100% 관통되도록 합니다.
  */
 class FloatingOverlayService : Service() {
 
@@ -139,6 +142,10 @@ class FloatingOverlayService : Service() {
 
         // 2. 타깃 핀 추가 (+)
         btnAddTarget.setOnClickListener {
+            if (isPlaying) {
+                Toast.makeText(this, "실행 중에는 핀을 추가할 수 없습니다. 일시정지 후 추가하세요.", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
             addTargetPin()
         }
 
@@ -151,7 +158,11 @@ class FloatingOverlayService : Service() {
         btnPlay.setOnClickListener {
             val service = MacroAccessibilityService.instance
             if (service == null) {
-                Toast.makeText(this, "접근성 설정에서 서비스를 켜주세요!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "접근성 설정에서 [Overlay Macro]를 켜주세요! 설정으로 이동합니다.", Toast.LENGTH_LONG).show()
+                val intent = Intent(android.provider.Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(intent)
                 return@setOnClickListener
             }
 
@@ -165,12 +176,21 @@ class FloatingOverlayService : Service() {
                 btnPlay.setImageResource(android.R.drawable.ic_media_pause)
                 btnPlay.setBackgroundColor(0xFFD97706.toInt()) // Amber
 
-                // 타깃 핀 위치와 저장된 설정을 결합하여 액션 생성
+                // [핵심 1]: 재생 시작 시 타깃 핀들을 '터치 관통(FLAG_NOT_TOUCHABLE)' 상태로 변경!
+                // 이렇게 해야 접근성 서비스가 화면을 누를 때 핀이 터치를 가로채지 않고 밑에 있는 앱이 클릭됨!
+                setPinsClickThrough(true)
+
+                // 타깃 핀들의 현재 화면 실제 중심 좌표 추출
                 val actions = targetPins.map { pinView ->
+                    val params = pinView.tag as? WindowManager.LayoutParams
                     val location = IntArray(2)
                     pinView.getLocationOnScreen(location)
-                    var centerX = location[0] + (pinView.width / 2f)
-                    var centerY = location[1] + (pinView.height / 2f)
+
+                    val rawX = if (location[0] > 0) location[0] + (pinView.width / 2f) else (params?.x ?: 200) + 70f
+                    val rawY = if (location[1] > 0) location[1] + (pinView.height / 2f) else (params?.y ?: 400) + 70f
+
+                    var centerX = rawX
+                    var centerY = rawY
 
                     // 오토방지 난수화 적용
                     if (currentSettings.isAntiBanEnabled) {
@@ -188,30 +208,63 @@ class FloatingOverlayService : Service() {
                 }
 
                 service.startMacro(actions)
-                Toast.makeText(this, "매크로 시작 (${currentSettings.clickIntervalMs}ms 주기)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "매크로 시작! [${actions.size}개 타깃, ${currentSettings.clickIntervalMs}ms 간격]",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 btnPlay.setImageResource(android.R.drawable.ic_media_play)
                 btnPlay.setBackgroundColor(0xFF16A34A.toInt()) // Green
+
+                // [핵심 2]: 정지 시 핀들을 다시 드래그할 수 있도록 터치 가능 상태로 복원
+                setPinsClickThrough(false)
+
                 service.stopMacro()
-                Toast.makeText(this, "매크로 일시정지", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "매크로 일시정지 (타깃 핀 드래그 가능)", Toast.LENGTH_SHORT).show()
             }
         }
 
         // 5. 핀 전체 삭제
         btnClear.setOnClickListener {
+            if (isPlaying) {
+                isPlaying = false
+                btnPlay.setImageResource(android.R.drawable.ic_media_play)
+                MacroAccessibilityService.instance?.stopMacro()
+            }
             targetPins.forEach { pin ->
                 try { windowManager.removeView(pin) } catch (_: Exception) {}
             }
             targetPins.clear()
-            isPlaying = false
-            MacroAccessibilityService.instance?.stopMacro()
-            btnPlay.setImageResource(android.R.drawable.ic_media_play)
             Toast.makeText(this, "모든 타깃 핀 삭제됨", Toast.LENGTH_SHORT).show()
         }
 
         // 6. 닫기
         btnClose.setOnClickListener {
             stopSelf()
+        }
+    }
+
+    /**
+     * 재생 중: 타깃 핀을 FLAG_NOT_TOUCHABLE로 설정하여
+     * 접근성 터치 이벤트가 핀 뒤에 있는 게임/앱 화면으로 100% 관통되도록 함.
+     * 정지 중: 사용자가 핀을 다시 손으로 드래그할 수 있도록 복원.
+     */
+    private fun setPinsClickThrough(clickThrough: Boolean) {
+        targetPins.forEach { pinView ->
+            val params = pinView.tag as? WindowManager.LayoutParams ?: return@forEach
+            if (clickThrough) {
+                params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                pinView.alpha = 0.75f // 실행 중임을 시각적으로 반투명 표시
+            } else {
+                params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+                pinView.alpha = 1.0f
+            }
+            try {
+                windowManager.updateViewLayout(pinView, params)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -264,8 +317,15 @@ class FloatingOverlayService : Service() {
             currentSettings.isAntiBanEnabled = cbAntiBan.isChecked
 
             MacroConfigManager.saveSettings(this, currentSettings)
-            Toast.makeText(this, "설정 변경됨: ${newInterval}ms 주기", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "설정 적용됨: ${newInterval}ms 주기", Toast.LENGTH_SHORT).show()
             closeSettingsDialog()
+
+            // 실행 중이었다면 새 주기로 재시작
+            if (isPlaying) {
+                isPlaying = false
+                val btnPlay = floatingView.findViewById<ImageButton>(R.id.btn_play_pause)
+                btnPlay.performClick()
+            }
         }
 
         windowManager.addView(dialogView, params)
@@ -306,9 +366,11 @@ class FloatingOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 200 + (pinNumber * 40)
-            y = 400 + (pinNumber * 40)
+            x = 220 + (pinNumber * 30)
+            y = 420 + (pinNumber * 30)
         }
+
+        pinView.tag = pinParams // params를 핀 뷰에 저장하여 위치 추적
 
         var pinInitX = 0
         var pinInitY = 0
@@ -316,6 +378,8 @@ class FloatingOverlayService : Service() {
         var pinTouchY = 0f
 
         pinView.setOnTouchListener { _, event ->
+            if (isPlaying) return@setOnTouchListener false
+
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     pinInitX = pinParams.x
@@ -336,7 +400,7 @@ class FloatingOverlayService : Service() {
 
         windowManager.addView(pinView, pinParams)
         targetPins.add(pinView)
-        Toast.makeText(this, "타깃 핀 #$pinNumber 추가됨", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "타깃 핀 #$pinNumber 생성됨 (원하는 위치로 드래그하세요)", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {

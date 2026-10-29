@@ -957,7 +957,201 @@ sealed class MacroAction {
 
   javaFolder?.file(
     'MacroAccessibilityService.kt',
-    generateAccessibilityServiceKotlin(script)
+    `package com.example.overlaymacro
+
+import android.accessibilityservice.AccessibilityService
+import android.accessibilityservice.GestureDescription
+import android.graphics.Path
+import android.os.Build
+import android.os.Handler
+import android.os.Looper
+import android.util.Log
+import android.view.accessibility.AccessibilityEvent
+import android.widget.Toast
+import androidx.annotation.RequiresApi
+
+/**
+ * MacroAccessibilityService:
+ * Android 7.0(API 24)+ 공식 API인 dispatchGesture()를 사용하여
+ * 루팅 없이 화면의 특정 좌표를 탭하거나 스와이프를 주입합니다.
+ *
+ * [핵심 안정성 개선]:
+ * 1. Path에 moveTo + lineTo 미세 선분을 추가하여 모든 기종(삼성 One UI, 샤오미, 픽셀)에서 터치 누락 방지
+ * 2. dispatchGesture 실패/취소(onCancelled) 시에도 루프가 영구 정지(Freeze)되지 않도록 안전 복구 처리
+ * 3. 동적 타깃 핀(List<MacroAction>) 반복 실행 지원
+ */
+class MacroAccessibilityService : AccessibilityService() {
+
+    private val handler = Handler(Looper.getMainLooper())
+    private var isRunning = false
+    private var actionList: List<MacroAction> = emptyList()
+    private var currentActionIndex = 0
+
+    companion object {
+        var instance: MacroAccessibilityService? = null
+            private set
+    }
+
+    override fun onServiceConnected() {
+        super.onServiceConnected()
+        instance = this
+        Log.d("MacroService", "접근성 서비스 연결 성공")
+        Toast.makeText(this, "Overlay Macro 접근성 서비스 활성화됨", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onAccessibilityEvent(event: AccessibilityEvent?) {
+        // UI 변경 이벤트 감지 필요시 사용
+    }
+
+    override fun onInterrupt() {
+        stopMacro()
+        Log.w("MacroService", "접근성 서비스 인터럽트 발생")
+    }
+
+    override fun onDestroy() {
+        super.onDestroy()
+        stopMacro()
+        instance = null
+    }
+
+    /**
+     * (x, y) 좌표 1회 클릭 (Tap) 주입
+     * Android 일부 기기에서 moveTo(x, y) 단독 사용 시 길이 0으로 무시되는 현상을
+     * lineTo(x + 1f, y + 1f) 미세 세그먼트로 완벽 해결
+     */
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun clickAt(x: Float, y: Float, durationMs: Long = 50L, onComplete: (() -> Unit)? = null) {
+        val path = Path().apply {
+            moveTo(x, y)
+            lineTo(x + 1f, y + 1f) // 필수: 제스처 엔진에 터치 모션 이벤트(DOWN/UP) 강제 발생
+        }
+
+        val strokeDuration = durationMs.coerceAtLeast(30L)
+        val stroke = GestureDescription.StrokeDescription(path, 0, strokeDuration)
+        val gesture = GestureDescription.Builder().addStroke(stroke).build()
+
+        val dispatched = dispatchGesture(gesture, object : GestureResultCallback() {
+            override fun onCompleted(gestureDescription: GestureDescription?) {
+                super.onCompleted(gestureDescription)
+                Log.d("MacroService", "클릭 성공: ($x, $y)")
+                onComplete?.invoke()
+            }
+
+            override fun onCancelled(gestureDescription: GestureDescription?) {
+                super.onCancelled(gestureDescription)
+                Log.w("MacroService", "클릭 취소됨: ($x, $y) - 루프 동결 방지를 위해 다음 단계로 진행")
+                onComplete?.invoke()
+            }
+        }, null)
+
+        if (!dispatched) {
+            Log.e("MacroService", "dispatchGesture 호출 실패 (다른 제스처 실행 중이거나 권한 문제)")
+            handler.postDelayed({ onComplete?.invoke() }, 500L)
+        }
+    }
+
+    /**
+     * (startX, startY) -> (endX, endY) 스와이프 제스처 주입
+     */
+    @RequiresApi(Build.VERSION_CODES.N)
+    fun swipe(
+        startX: Float,
+        startY: Float,
+        endX: Float,
+        endY: Float,
+        durationMs: Long = 300L,
+        onComplete: (() -> Unit)? = null
+    ) {
+        val path = Path().apply {
+            moveTo(startX, startY)
+            lineTo(endX, endY)
+        }
+        val stroke = GestureDescription.StrokeDescription(path, 0, durationMs.coerceAtLeast(100L))
+        val gesture = GestureDescription.Builder().addStroke(stroke).build()
+
+        val dispatched = dispatchGesture(gesture, object : GestureResultCallback() {
+            override fun onCompleted(gestureDescription: GestureDescription?) {
+                super.onCompleted(gestureDescription)
+                Log.d("MacroService", "스와이프 성공: ($startX, $startY) -> ($endX, $endY)")
+                onComplete?.invoke()
+            }
+
+            override fun onCancelled(gestureDescription: GestureDescription?) {
+                super.onCancelled(gestureDescription)
+                Log.w("MacroService", "스와이프 취소됨")
+                onComplete?.invoke()
+            }
+        }, null)
+
+        if (!dispatched) {
+            handler.postDelayed({ onComplete?.invoke() }, 500L)
+        }
+    }
+
+    /**
+     * 액션 리스트 반복 실행 시작
+     */
+    fun startMacro(actions: List<MacroAction>) {
+        if (actions.isEmpty()) {
+            Toast.makeText(this, "실행할 타깃 액션이 없습니다.", Toast.LENGTH_SHORT).show()
+            return
+        }
+        actionList = actions
+        isRunning = true
+        currentActionIndex = 0
+        Log.d("MacroService", "매크로 루프 시작: 총 \${actions.size}개 액션")
+        executeNextAction()
+    }
+
+    fun stopMacro() {
+        isRunning = false
+        handler.removeCallbacksAndMessages(null)
+        Log.d("MacroService", "매크로 루프 정지됨")
+    }
+
+    private fun executeNextAction() {
+        if (!isRunning || actionList.isEmpty()) return
+
+        if (currentActionIndex >= actionList.size) {
+            currentActionIndex = 0 // 무한 반복
+        }
+
+        val action = actionList[currentActionIndex]
+        val currentStep = currentActionIndex + 1
+        currentActionIndex++
+
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            when (action) {
+                is MacroAction.Tap -> {
+                    Log.d("MacroService", "[\$currentStep/\${actionList.size}] 타깃 클릭 실행: (\${action.x}, \${action.y})")
+                    clickAt(action.x, action.y, action.durationMs) {
+                        if (isRunning) {
+                            handler.postDelayed({ executeNextAction() }, action.delayAfterMs)
+                        }
+                    }
+                }
+                is MacroAction.Swipe -> {
+                    Log.d("MacroService", "[\$currentStep/\${actionList.size}] 스와이프 실행")
+                    swipe(
+                        action.startX,
+                        action.startY,
+                        action.endX,
+                        action.endY,
+                        action.durationMs
+                    ) {
+                        if (isRunning) {
+                            handler.postDelayed({ executeNextAction() }, action.delayAfterMs)
+                        }
+                    }
+                }
+                is MacroAction.Delay -> {
+                    handler.postDelayed({ executeNextAction() }, action.durationMs)
+                }
+            }
+        }
+    }
+}
+`
   );
 
   javaFolder?.file(
@@ -973,6 +1167,7 @@ import android.content.Intent
 import android.graphics.PixelFormat
 import android.os.Build
 import android.os.IBinder
+import android.provider.Settings
 import android.view.Gravity
 import android.view.LayoutInflater
 import android.view.MotionEvent
@@ -987,6 +1182,14 @@ import android.widget.Toast
 import androidx.core.app.NotificationCompat
 import kotlin.random.Random
 
+/**
+ * FloatingOverlayService:
+ * 다른 앱 위에 항상 떠 있는 플로팅 툴바 및 타깃 핀(①, ②, ③)을 관리합니다.
+ *
+ * [핵심 터치 관통(Click-Through) 해결]:
+ * 재생(Play) 중에는 타깃 핀에 FLAG_NOT_TOUCHABLE 플래그를 적용하여,
+ * 접근성 서비스가 쏘는 터치가 핀에 가로막히지 않고 밑에 있는 게임/앱 화면으로 100% 관통되도록 합니다.
+ */
 class FloatingOverlayService : Service() {
 
     private lateinit var windowManager: WindowManager
@@ -1099,7 +1302,11 @@ class FloatingOverlayService : Service() {
         btnPlay.setOnClickListener {
             val service = MacroAccessibilityService.instance
             if (service == null) {
-                Toast.makeText(this, "접근성 설정에서 서비스를 켜주세요!", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "접근성 설정에서 [Overlay Macro] 서비스를 켜주세요! 설정으로 이동합니다.", Toast.LENGTH_LONG).show()
+                val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS).apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK
+                }
+                startActivity(intent)
                 return@setOnClickListener
             }
 
@@ -1111,51 +1318,106 @@ class FloatingOverlayService : Service() {
             isPlaying = !isPlaying
             if (isPlaying) {
                 btnPlay.setImageResource(android.R.drawable.ic_media_pause)
-                btnPlay.setBackgroundColor(0xFFD97706.toInt())
+                btnPlay.setBackgroundColor(0xFFD97706.toInt()) // Amber
 
-                val actions = targetPins.map { pinView ->
-                    val location = IntArray(2)
-                    pinView.getLocationOnScreen(location)
-                    var centerX = location[0] + (pinView.width / 2f)
-                    var centerY = location[1] + (pinView.height / 2f)
+                // [핵심 1]: 재생 시작 시 타깃 핀들을 '터치 관통(FLAG_NOT_TOUCHABLE)' 상태로 변경!
+                // 접근성 제스처 터치가 핀에 흡수되지 않고 게임/앱 화면으로 100% 관통되도록 보장!
+                setPinsClickThrough(true)
 
-                    if (currentSettings.isAntiBanEnabled) {
-                        val offset = currentSettings.antiBanOffsetPx
-                        centerX += Random.nextInt(-offset, offset + 1)
-                        centerY += Random.nextInt(-offset, offset + 1)
-                    }
-
-                    MacroAction.Tap(
-                        x = centerX,
-                        y = centerY,
-                        durationMs = currentSettings.pressDurationMs,
-                        delayAfterMs = currentSettings.clickIntervalMs
-                    )
-                }
-
+                val actions = buildCurrentActions()
                 service.startMacro(actions)
-                Toast.makeText(this, "매크로 시작 (\${currentSettings.clickIntervalMs}ms 주기)", Toast.LENGTH_SHORT).show()
+                Toast.makeText(
+                    this,
+                    "매크로 시작! [\${actions.size}개 타깃, \${currentSettings.clickIntervalMs}ms 주기]",
+                    Toast.LENGTH_SHORT
+                ).show()
             } else {
                 btnPlay.setImageResource(android.R.drawable.ic_media_play)
-                btnPlay.setBackgroundColor(0xFF16A34A.toInt())
+                btnPlay.setBackgroundColor(0xFF16A34A.toInt()) // Green
+
+                // [핵심 2]: 정지 시 핀들을 다시 드래그할 수 있도록 터치 가능 상태로 복원
+                setPinsClickThrough(false)
+
                 service.stopMacro()
-                Toast.makeText(this, "매크로 일시정지", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "매크로 일시정지 (타깃 핀 드래그 가능)", Toast.LENGTH_SHORT).show()
             }
         }
 
         btnClear.setOnClickListener {
+            if (isPlaying) {
+                isPlaying = false
+                btnPlay.setImageResource(android.R.drawable.ic_media_play)
+                MacroAccessibilityService.instance?.stopMacro()
+            }
+            setPinsClickThrough(false)
             targetPins.forEach { pin ->
                 try { windowManager.removeView(pin) } catch (_: Exception) {}
             }
             targetPins.clear()
-            isPlaying = false
-            MacroAccessibilityService.instance?.stopMacro()
-            btnPlay.setImageResource(android.R.drawable.ic_media_play)
-            Toast.makeText(this, "타깃 핀 초기화", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, "모든 타깃 핀 삭제됨", Toast.LENGTH_SHORT).show()
         }
 
         btnClose.setOnClickListener {
             stopSelf()
+        }
+    }
+
+    private fun buildCurrentActions(): List<MacroAction> {
+        return targetPins.map { pinView ->
+            val params = pinView.tag as? WindowManager.LayoutParams
+            val location = IntArray(2)
+            pinView.getLocationOnScreen(location)
+
+            val rawX = if (location[0] != 0 || location[1] != 0) {
+                location[0] + (pinView.width / 2f)
+            } else {
+                (params?.x?.toFloat() ?: 200f) + (if (pinView.width > 0) pinView.width / 2f else 60f)
+            }
+
+            val rawY = if (location[0] != 0 || location[1] != 0) {
+                location[1] + (pinView.height / 2f)
+            } else {
+                (params?.y?.toFloat() ?: 400f) + (if (pinView.height > 0) pinView.height / 2f else 60f)
+            }
+
+            var centerX = rawX
+            var centerY = rawY
+
+            if (currentSettings.isAntiBanEnabled) {
+                val offset = currentSettings.antiBanOffsetPx
+                centerX += Random.nextInt(-offset, offset + 1)
+                centerY += Random.nextInt(-offset, offset + 1)
+            }
+
+            MacroAction.Tap(
+                x = centerX,
+                y = centerY,
+                durationMs = currentSettings.pressDurationMs,
+                delayAfterMs = currentSettings.clickIntervalMs
+            )
+        }
+    }
+
+    /**
+     * 재생 중: 타깃 핀을 FLAG_NOT_TOUCHABLE로 설정하여
+     * 접근성 터치 이벤트가 핀 뒤에 있는 게임/앱 화면으로 100% 관통되도록 함.
+     * 정지 중: 사용자가 핀을 다시 손으로 드래그할 수 있도록 복원.
+     */
+    private fun setPinsClickThrough(clickThrough: Boolean) {
+        targetPins.forEach { pinView ->
+            val params = pinView.tag as? WindowManager.LayoutParams ?: return@forEach
+            if (clickThrough) {
+                params.flags = params.flags or WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE
+                pinView.alpha = 0.75f
+            } else {
+                params.flags = params.flags and WindowManager.LayoutParams.FLAG_NOT_TOUCHABLE.inv()
+                pinView.alpha = 1.0f
+            }
+            try {
+                windowManager.updateViewLayout(pinView, params)
+            } catch (e: Exception) {
+                e.printStackTrace()
+            }
         }
     }
 
@@ -1205,7 +1467,14 @@ class FloatingOverlayService : Service() {
             currentSettings.isAntiBanEnabled = cbAntiBan.isChecked
 
             MacroConfigManager.saveSettings(this, currentSettings)
-            Toast.makeText(this, "설정 변경됨: \${newInterval}ms 주기", Toast.LENGTH_SHORT).show()
+
+            // 실행 중이면 즉시 새로운 주기로 갱신하여 연속 적용!
+            if (isPlaying) {
+                val updatedActions = buildCurrentActions()
+                MacroAccessibilityService.instance?.startMacro(updatedActions)
+            }
+
+            Toast.makeText(this, "설정 적용됨: \${newInterval}ms 주기", Toast.LENGTH_SHORT).show()
             closeSettingsDialog()
         }
 
@@ -1244,9 +1513,11 @@ class FloatingOverlayService : Service() {
             PixelFormat.TRANSLUCENT
         ).apply {
             gravity = Gravity.TOP or Gravity.START
-            x = 250 + (num * 30)
-            y = 450 + (num * 30)
+            x = 220 + (num * 30)
+            y = 420 + (num * 30)
         }
+
+        pinView.tag = pinParams
 
         var pinInitX = 0
         var pinInitY = 0
@@ -1254,6 +1525,8 @@ class FloatingOverlayService : Service() {
         var pinTouchY = 0f
 
         pinView.setOnTouchListener { _, event ->
+            if (isPlaying) return@setOnTouchListener false
+
             when (event.action) {
                 MotionEvent.ACTION_DOWN -> {
                     pinInitX = pinParams.x
@@ -1274,13 +1547,14 @@ class FloatingOverlayService : Service() {
 
         windowManager.addView(pinView, pinParams)
         targetPins.add(pinView)
-        Toast.makeText(this, "타깃 핀 #\$num 생성됨", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "타깃 핀 #\$num 생성됨 (원하는 곳으로 드래그)", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         MacroAccessibilityService.instance?.stopMacro()
         closeSettingsDialog()
+        setPinsClickThrough(false)
         targetPins.forEach { try { windowManager.removeView(it) } catch (_: Exception) {} }
         targetPins.clear()
         if (::floatingView.isInitialized) {

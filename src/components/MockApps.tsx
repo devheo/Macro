@@ -61,27 +61,20 @@ export const MockApps: React.FC<MockAppsProps> = ({
 
     // Game app hit detection
     if (activeApp === 'game') {
-      // If tapped in upper-middle area (monster) or attack button area
-      const isMonsterArea = lastTouch.y >= 30 && lastTouch.y <= 65;
       const isAttackBtn = lastTouch.y >= 70 && lastTouch.x >= 65;
-
-      if (isMonsterArea || isAttackBtn) {
-        hitMonster(isAttackBtn ? 25 : 15);
-      }
+      const isMonsterArea = lastTouch.y >= 30 && lastTouch.y <= 65;
+      const dmg = isAttackBtn ? 30 : (isMonsterArea ? 20 : 15);
+      hitMonster(dmg, lastTouch.x, lastTouch.y);
     }
 
     // Flash sale app click
     if (activeApp === 'sale') {
-      if (lastTouch.y >= 75) {
-        handleSaleClick();
-      }
+      handleSaleClick();
     }
 
     // Reels like tap
     if (activeApp === 'reels') {
-      if (lastTouch.x > 80 && lastTouch.y > 55 && lastTouch.y < 70) {
-        toggleLike();
-      }
+      toggleLike();
     }
   }, [lastTouch]);
 
@@ -100,7 +93,7 @@ export const MockApps: React.FC<MockAppsProps> = ({
     }
   }, [lastSwipe]);
 
-  const hitMonster = (dmg: number) => {
+  const hitMonster = (dmg: number, spawnX?: number, spawnY?: number) => {
     setCombo((c) => c + 1);
     setGold((g) => g + 15);
     setMonsterHp((hp) => {
@@ -118,8 +111,8 @@ export const MockApps: React.FC<MockAppsProps> = ({
       {
         id: newId,
         text: `-${dmg}`,
-        x: 40 + Math.random() * 20,
-        y: 40 + Math.random() * 15,
+        x: spawnX !== undefined ? Math.max(10, Math.min(85, spawnX)) : 40 + Math.random() * 20,
+        y: spawnY !== undefined ? Math.max(15, Math.min(85, spawnY - 5)) : 40 + Math.random() * 15,
       },
     ]);
 
