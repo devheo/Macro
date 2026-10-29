@@ -1,11 +1,12 @@
 import React from 'react';
-import { Smartphone, Code, Sparkles, BookOpen } from 'lucide-react';
+import { Smartphone, Code, Sparkles, BookOpen, Plus } from 'lucide-react';
 import { MacroScript } from '../types/macro';
 import { PRESET_SCRIPTS } from '../data/presets';
 
 interface HeaderProps {
   currentScript: MacroScript;
   onSelectPreset: (preset: MacroScript) => void;
+  onOpenNewMacroWizard: () => void;
   onOpenCodeModal: () => void;
   onOpenAiGenerator: () => void;
   onOpenRealPhoneGuide: () => void;
@@ -15,6 +16,7 @@ interface HeaderProps {
 export const Header: React.FC<HeaderProps> = ({
   currentScript,
   onSelectPreset,
+  onOpenNewMacroWizard,
   onOpenCodeModal,
   onOpenAiGenerator,
   onOpenRealPhoneGuide,
@@ -102,13 +104,22 @@ export const Header: React.FC<HeaderProps> = ({
       </nav>
 
       {/* Zone 3: 1 Primary CTA Button */}
-      <div className="flex items-center gap-3 shrink-0">
+      <div className="flex items-center gap-2 shrink-0">
+        <button
+          onClick={onOpenNewMacroWizard}
+          className="px-3.5 py-2 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 active:scale-98 rounded-xl shadow-md shadow-emerald-950/60 transition-all flex items-center gap-1.5 whitespace-nowrap"
+          title="새로운 매크로 생성 마법사 열기"
+        >
+          <Plus className="w-3.5 h-3.5" />
+          <span>새 매크로 생성</span>
+        </button>
+
         <button
           onClick={onOpenCodeModal}
-          className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-98 rounded-xl shadow-md shadow-indigo-950/60 transition-all flex items-center gap-2 whitespace-nowrap"
+          className="px-3 py-2 text-xs font-semibold text-slate-300 hover:text-white bg-slate-800 hover:bg-slate-700 active:scale-98 rounded-xl border border-slate-700 transition-all flex items-center gap-1.5 whitespace-nowrap"
         >
           <Code className="w-3.5 h-3.5" />
-          <span>안드로이드 프로젝트 (.ZIP 다운로드)</span>
+          <span>프로젝트 (.ZIP)</span>
         </button>
       </div>
     </header>

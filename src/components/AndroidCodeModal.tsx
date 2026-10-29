@@ -34,7 +34,7 @@ export const AndroidCodeModal: React.FC<AndroidCodeModalProps> = ({
   script,
 }) => {
   const [activeTab, setActiveTab] = useState<
-    'overview' | 'accessibility' | 'overlay' | 'manifest' | 'config' | 'adb'
+    'overview' | 'settings_ui' | 'accessibility' | 'overlay' | 'manifest' | 'config' | 'adb'
   >('overview');
   const [copied, setCopied] = useState(false);
   const [isZipping, setIsZipping] = useState(false);
@@ -54,6 +54,59 @@ export const AndroidCodeModal: React.FC<AndroidCodeModalProps> = ({
 
   const getCodeForTab = () => {
     switch (activeTab) {
+      case 'settings_ui':
+        return `<!-- app/src/main/res/layout/activity_main.xml (앱 내 매크로 설정 화면) -->
+<!-- 스마트폰 앱 안에서 클릭 주기(ms), 누름 시간, 무한반복, 오토방지 난수화를 직접 설정 -->
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#0B0F19">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="vertical"
+        android:padding="20dp">
+
+        <!-- 매크로 동작 파라미터 설정 카드 -->
+        <TextView
+            android:text="⚙️ 매크로 동작 설정 (Macro Settings)"
+            android:textColor="#F8FAFC"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <!-- 1. 정해진 클릭 주기 (ms) 및 0.1s/1s/3s/5s 퀵 칩 -->
+        <EditText
+            android:id="@+id/et_interval_ms"
+            android:hint="예: 3000 (3초마다 클릭)"
+            android:inputType="number" />
+
+        <!-- 2. 터치 누름 지속시간 (ms) -->
+        <EditText
+            android:id="@+id/et_duration_ms"
+            android:hint="50"
+            android:inputType="number" />
+
+        <!-- 3. 반복 방식: 무한 반복 vs N회 지정 -->
+        <RadioGroup android:id="@+id/rg_loop_mode">
+            <RadioButton android:id="@+id/rb_infinite" android:text="무한 반복" />
+            <RadioButton android:id="@+id/rb_count" android:text="횟수 지정" />
+        </RadioGroup>
+
+        <!-- 4. 오토 탐지 방지 (좌표 ±8px 난수화) -->
+        <CheckBox
+            android:id="@+id/cb_antiban"
+            android:text="오토 탐지 방지 (좌표/시간 랜덤 편차)"
+            android:checked="true" />
+
+        <!-- 5. 시작 버튼 -->
+        <Button
+            android:id="@+id/btn_start_overlay"
+            android:text="설정 저장 및 플로팅 오버레이 시작"
+            android:backgroundTint="#16A34A" />
+
+    </LinearLayout>
+</ScrollView>`;
       case 'accessibility':
         return generateAccessibilityServiceKotlin(script);
       case 'overlay':
@@ -151,6 +204,16 @@ export const AndroidCodeModal: React.FC<AndroidCodeModalProps> = ({
             }`}
           >
             01. 구조 및 빌드 가이드
+          </button>
+          <button
+            onClick={() => setActiveTab('settings_ui')}
+            className={`px-3 py-1.5 rounded-lg font-medium whitespace-nowrap transition-colors flex items-center gap-1 ${
+              activeTab === 'settings_ui'
+                ? 'bg-indigo-600 text-white shadow-xs'
+                : 'text-slate-400 hover:text-slate-200'
+            }`}
+          >
+            <span>activity_main.xml (앱 내 설정 UI)</span>
           </button>
           <button
             onClick={() => setActiveTab('accessibility')}

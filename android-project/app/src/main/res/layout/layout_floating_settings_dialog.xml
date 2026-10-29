@@ -1,0 +1,147 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_root"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FA0B0F19"
+    android:padding="16dp"
+    android:elevation="12dp">
+
+    <!-- Top Dialog Bar -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⚡ 매크로 간편 설정"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btn_dialog_close"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:tint="#94A3B8" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#334155"
+        android:layout_marginVertical="10dp" />
+
+    <!-- 클릭 주기 변경 -->
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="클릭 주기 (ms)"
+        android:textColor="#CBD5E1"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="4dp">
+
+        <EditText
+            android:id="@+id/dialog_et_interval"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:background="#151C2C"
+            android:textColor="#38BDF8"
+            android:inputType="number"
+            android:paddingHorizontal="10dp"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ms"
+            android:textColor="#94A3B8"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <!-- 빠른 주기 버튼 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
+
+        <Button
+            android:id="@+id/dialog_btn_100ms"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:text="0.1초"
+            android:textSize="10sp"
+            android:backgroundTint="#1E293B" />
+
+        <Button
+            android:id="@+id/dialog_btn_1s"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="1초"
+            android:textSize="10sp"
+            android:backgroundTint="#1E293B" />
+
+        <Button
+            android:id="@+id/dialog_btn_3s"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="3초"
+            android:textSize="10sp"
+            android:backgroundTint="#4F46E5" />
+
+        <Button
+            android:id="@+id/dialog_btn_5s"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="5초"
+            android:textSize="10sp"
+            android:backgroundTint="#1E293B" />
+    </LinearLayout>
+
+    <!-- 오토 탐지 방지 체크 -->
+    <CheckBox
+        android:id="@+id/dialog_cb_antiban"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="오토 방지 랜덤 편차 (±8px)"
+        android:textColor="#CBD5E1"
+        android:textSize="12sp"
+        android:checked="true"
+        android:layout_marginTop="8dp" />
+
+    <!-- 적용 버튼 -->
+    <Button
+        android:id="@+id/dialog_btn_apply"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="설정 적용하기"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:backgroundTint="#16A34A"
+        android:layout_marginTop="12dp" />
+
+</LinearLayout>

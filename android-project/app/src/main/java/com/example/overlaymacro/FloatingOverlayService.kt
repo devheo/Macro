@@ -14,14 +14,19 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import kotlin.random.Random
 
 /**
  * FloatingOverlayService:
- * 다른 앱 위에 항상 떠 있는 플로팅 툴바 및 드래그 가능한 타깃 핀(①, ②, ③)을 관리합니다.
+ * 다른 앱 위에 항상 떠 있는 플로팅 툴바 및 타깃 핀(①, ②, ③)을 관리하고,
+ * 온스크린 플로팅 설정 다이얼로그(⚙️)를 통해 앱으로 돌아가지 않고도 화면 위에서 즉시 매크로 주기를 변경합니다.
  */
 class FloatingOverlayService : Service() {
 
@@ -29,15 +34,23 @@ class FloatingOverlayService : Service() {
     private lateinit var floatingView: View
     private lateinit var floatingParams: WindowManager.LayoutParams
 
+    // 플로팅 설정 다이얼로그
+    private var settingsDialogView: View? = null
+    private var settingsDialogParams: WindowManager.LayoutParams? = null
+
     // 타깃 핀 관리 리스트
     private val targetPins = mutableListOf<View>()
     private var isPlaying = false
+
+    // 현재 매크로 설정 캐시
+    private lateinit var currentSettings: MacroSettings
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        currentSettings = MacroConfigManager.loadSettings(this)
 
         startForegroundServiceNotification()
         setupFloatingToolbar()
@@ -56,8 +69,8 @@ class FloatingOverlayService : Service() {
         }
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
-            .setContentTitle("Overlay Macro 실행 중")
-            .setContentText("다른 앱 위에서 플로팅 컨트롤러가 활성화되었습니다.")
+            .setContentTitle("Overlay Macro 활성화됨")
+            .setContentText("클릭 주기: ${currentSettings.clickIntervalMs}ms")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .build()
 
@@ -95,6 +108,7 @@ class FloatingOverlayService : Service() {
         val btnDrag = floatingView.findViewById<View>(R.id.btn_drag)
         val btnPlay = floatingView.findViewById<ImageButton>(R.id.btn_play_pause)
         val btnAddTarget = floatingView.findViewById<ImageButton>(R.id.btn_add_target)
+        val btnSettings = floatingView.findViewById<ImageButton>(R.id.btn_settings)
         val btnClear = floatingView.findViewById<ImageButton>(R.id.btn_clear_targets)
         val btnClose = floatingView.findViewById<ImageButton>(R.id.btn_close)
 
@@ -128,7 +142,12 @@ class FloatingOverlayService : Service() {
             addTargetPin()
         }
 
-        // 3. 재생 / 일시정지
+        // 3. 플로팅 간편 설정 팝업 열기 (⚙️)
+        btnSettings.setOnClickListener {
+            toggleFloatingSettingsDialog()
+        }
+
+        // 4. 재생 / 일시정지
         btnPlay.setOnClickListener {
             val service = MacroAccessibilityService.instance
             if (service == null) {
@@ -146,18 +165,30 @@ class FloatingOverlayService : Service() {
                 btnPlay.setImageResource(android.R.drawable.ic_media_pause)
                 btnPlay.setBackgroundColor(0xFFD97706.toInt()) // Amber
 
-                // 타깃 핀들의 현재 화면 좌표를 기반으로 액션 생성
+                // 타깃 핀 위치와 저장된 설정을 결합하여 액션 생성
                 val actions = targetPins.map { pinView ->
                     val location = IntArray(2)
                     pinView.getLocationOnScreen(location)
-                    // 핀 중심 좌표 계산
-                    val centerX = location[0] + (pinView.width / 2f)
-                    val centerY = location[1] + (pinView.height / 2f)
-                    MacroAction.Tap(centerX, centerY, durationMs = 50L, delayAfterMs = 1500L)
+                    var centerX = location[0] + (pinView.width / 2f)
+                    var centerY = location[1] + (pinView.height / 2f)
+
+                    // 오토방지 난수화 적용
+                    if (currentSettings.isAntiBanEnabled) {
+                        val offset = currentSettings.antiBanOffsetPx
+                        centerX += Random.nextInt(-offset, offset + 1)
+                        centerY += Random.nextInt(-offset, offset + 1)
+                    }
+
+                    MacroAction.Tap(
+                        x = centerX,
+                        y = centerY,
+                        durationMs = currentSettings.pressDurationMs,
+                        delayAfterMs = currentSettings.clickIntervalMs
+                    )
                 }
 
                 service.startMacro(actions)
-                Toast.makeText(this, "${actions.size}개 타깃 매크로 시작", Toast.LENGTH_SHORT).show()
+                Toast.makeText(this, "매크로 시작 (${currentSettings.clickIntervalMs}ms 주기)", Toast.LENGTH_SHORT).show()
             } else {
                 btnPlay.setImageResource(android.R.drawable.ic_media_play)
                 btnPlay.setBackgroundColor(0xFF16A34A.toInt()) // Green
@@ -166,12 +197,10 @@ class FloatingOverlayService : Service() {
             }
         }
 
-        // 4. 핀 전체 삭제
+        // 5. 핀 전체 삭제
         btnClear.setOnClickListener {
             targetPins.forEach { pin ->
-                try {
-                    windowManager.removeView(pin)
-                } catch (_: Exception) {}
+                try { windowManager.removeView(pin) } catch (_: Exception) {}
             }
             targetPins.clear()
             isPlaying = false
@@ -180,10 +209,76 @@ class FloatingOverlayService : Service() {
             Toast.makeText(this, "모든 타깃 핀 삭제됨", Toast.LENGTH_SHORT).show()
         }
 
-        // 5. 닫기
+        // 6. 닫기
         btnClose.setOnClickListener {
             stopSelf()
         }
+    }
+
+    /**
+     * 화면 위에 플로팅 설정 다이얼로그 띄우기
+     */
+    private fun toggleFloatingSettingsDialog() {
+        if (settingsDialogView != null) {
+            closeSettingsDialog()
+            return
+        }
+
+        val overlayType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.layout_floating_settings_dialog, null)
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            overlayType,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.CENTER
+        }
+
+        val etInterval = dialogView.findViewById<EditText>(R.id.dialog_et_interval)
+        val cbAntiBan = dialogView.findViewById<CheckBox>(R.id.dialog_cb_antiban)
+
+        etInterval.setText(currentSettings.clickIntervalMs.toString())
+        cbAntiBan.isChecked = currentSettings.isAntiBanEnabled
+
+        dialogView.findViewById<Button>(R.id.dialog_btn_100ms).setOnClickListener { etInterval.setText("100") }
+        dialogView.findViewById<Button>(R.id.dialog_btn_1s).setOnClickListener { etInterval.setText("1000") }
+        dialogView.findViewById<Button>(R.id.dialog_btn_3s).setOnClickListener { etInterval.setText("3000") }
+        dialogView.findViewById<Button>(R.id.dialog_btn_5s).setOnClickListener { etInterval.setText("5000") }
+
+        dialogView.findViewById<View>(R.id.btn_dialog_close).setOnClickListener {
+            closeSettingsDialog()
+        }
+
+        dialogView.findViewById<Button>(R.id.dialog_btn_apply).setOnClickListener {
+            val newInterval = etInterval.text.toString().toLongOrNull() ?: currentSettings.clickIntervalMs
+            currentSettings.clickIntervalMs = newInterval
+            currentSettings.isAntiBanEnabled = cbAntiBan.isChecked
+
+            MacroConfigManager.saveSettings(this, currentSettings)
+            Toast.makeText(this, "설정 변경됨: ${newInterval}ms 주기", Toast.LENGTH_SHORT).show()
+            closeSettingsDialog()
+        }
+
+        windowManager.addView(dialogView, params)
+        settingsDialogView = dialogView
+        settingsDialogParams = params
+    }
+
+    private fun closeSettingsDialog() {
+        settingsDialogView?.let {
+            try { windowManager.removeView(it) } catch (_: Exception) {}
+        }
+        settingsDialogView = null
+        settingsDialogParams = null
     }
 
     /**
@@ -215,7 +310,6 @@ class FloatingOverlayService : Service() {
             y = 400 + (pinNumber * 40)
         }
 
-        // 타깃 핀 터치 드래그 리스너
         var pinInitX = 0
         var pinInitY = 0
         var pinTouchX = 0f
@@ -242,24 +336,21 @@ class FloatingOverlayService : Service() {
 
         windowManager.addView(pinView, pinParams)
         targetPins.add(pinView)
-        Toast.makeText(this, "타깃 핀 #$pinNumber 추가됨 (드래그하여 원하는 위치에 놓으세요)", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "타깃 핀 #$pinNumber 추가됨", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
         super.onDestroy()
         MacroAccessibilityService.instance?.stopMacro()
+        closeSettingsDialog()
 
         targetPins.forEach { pin ->
-            try {
-                windowManager.removeView(pin)
-            } catch (_: Exception) {}
+            try { windowManager.removeView(pin) } catch (_: Exception) {}
         }
         targetPins.clear()
 
         if (::floatingView.isInitialized) {
-            try {
-                windowManager.removeView(floatingView)
-            } catch (_: Exception) {}
+            try { windowManager.removeView(floatingView) } catch (_: Exception) {}
         }
     }
 }

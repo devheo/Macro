@@ -308,101 +308,321 @@ dependencies {
   layoutFolder?.file(
     'activity_main.xml',
     `<?xml version="1.0" encoding="utf-8"?>
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:orientation="vertical"
-    android:background="#0F172A"
-    android:padding="24dp">
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="오버레이 매크로 컨트롤러"
-        android:textColor="#FFFFFF"
-        android:textSize="22sp"
-        android:textStyle="bold"
-        android:layout_marginTop="20dp" />
-
-    <TextView
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="다른 앱 위에 플로팅 위젯을 띄우고 정해진 초마다 클릭 및 스와이프를 실행합니다."
-        android:textColor="#94A3B8"
-        android:textSize="13sp"
-        android:layout_marginTop="8dp" />
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#334155"
-        android:layout_marginVertical="24dp" />
+    android:background="#0B0F19"
+    android:fillViewport="true">
 
     <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
-        android:background="#1E293B"
-        android:padding="16dp"
-        android:layout_marginBottom="12dp">
+        android:padding="20dp">
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="1단계: 다른 앱 위에 그리기 권한"
-            android:textColor="#F8FAFC"
-            android:textSize="15sp"
-            android:textStyle="bold" />
-
-        <Button
-            android:id="@+id/btn_grant_overlay"
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="다른 앱 위에 표시 허용하기"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="#4F46E5" />
-    </LinearLayout>
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="8dp">
 
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:orientation="vertical"
-        android:background="#1E293B"
-        android:padding="16dp"
-        android:layout_marginBottom="24dp">
+            <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:src="@mipmap/ic_launcher"
+                android:contentDescription="App Icon" />
 
-        <TextView
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:text="2단계: 접근성 제스처 주입 권한"
-            android:textColor="#F8FAFC"
-            android:textSize="15sp"
-            android:textStyle="bold" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginStart="14dp">
 
-        <Button
-            android:id="@+id/btn_grant_accessibility"
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Overlay Macro"
+                    android:textColor="#FFFFFF"
+                    android:textSize="20sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="안드로이드 오버레이 매크로 설정"
+                    android:textColor="#94A3B8"
+                    android:textSize="12sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <View
+            android:layout_width="match_parent"
+            android:layout_height="1dp"
+            android:background="#1E293B"
+            android:layout_marginVertical="16dp" />
+
+        <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:text="접근성 서비스 활성화하기"
-            android:layout_marginTop="12dp"
-            android:backgroundTint="#0D9488" />
+            android:orientation="vertical"
+            android:background="#151C2C"
+            android:padding="16dp"
+            android:layout_marginBottom="16dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="⚙️ 매크로 동작 설정 (Macro Settings)"
+                android:textColor="#F8FAFC"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="클릭 주기 및 반복 방식을 스마트폰 안에서 직접 설정합니다."
+                android:textColor="#94A3B8"
+                android:textSize="11sp"
+                android:layout_marginTop="2dp"
+                android:layout_marginBottom="14dp" />
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="정해진 클릭 주기 (Click Interval)"
+                android:textColor="#E2E8F0"
+                android:textSize="13sp"
+                android:textStyle="bold" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
+
+                <EditText
+                    android:id="@+id/et_interval_ms"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="#0B0F19"
+                    android:textColor="#38BDF8"
+                    android:hint="3000"
+                    android:inputType="number"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="15sp"
+                    android:textStyle="bold" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="밀리초 (ms)"
+                    android:textColor="#94A3B8"
+                    android:textSize="13sp"
+                    android:layout_marginStart="10dp" />
+            </LinearLayout>
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:layout_marginTop="8dp">
+
+                <Button
+                    android:id="@+id/btn_chip_100ms"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:text="0.1초"
+                    android:textSize="11sp"
+                    android:backgroundTint="#334155" />
+
+                <Button
+                    android:id="@+id/btn_chip_1s"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="1초"
+                    android:textSize="11sp"
+                    android:backgroundTint="#334155" />
+
+                <Button
+                    android:id="@+id/btn_chip_3s"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="3초"
+                    android:textSize="11sp"
+                    android:backgroundTint="#4F46E5" />
+
+                <Button
+                    android:id="@+id/btn_chip_5s"
+                    android:layout_width="0dp"
+                    android:layout_height="36dp"
+                    android:layout_weight="1"
+                    android:layout_marginStart="4dp"
+                    android:text="5초"
+                    android:textSize="11sp"
+                    android:backgroundTint="#334155" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="터치 누름 유지 시간 (Duration)"
+                android:textColor="#E2E8F0"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginTop="6dp">
+
+                <EditText
+                    android:id="@+id/et_duration_ms"
+                    android:layout_width="0dp"
+                    android:layout_height="44dp"
+                    android:layout_weight="1"
+                    android:background="#0B0F19"
+                    android:textColor="#38BDF8"
+                    android:hint="50"
+                    android:inputType="number"
+                    android:paddingHorizontal="12dp"
+                    android:textSize="14sp" />
+
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="ms (일반: 50ms, 길게: 800ms)"
+                    android:textColor="#94A3B8"
+                    android:textSize="11sp"
+                    android:layout_marginStart="10dp" />
+            </LinearLayout>
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="반복 방식 (Loop Mode)"
+                android:textColor="#E2E8F0"
+                android:textSize="13sp"
+                android:textStyle="bold"
+                android:layout_marginTop="16dp" />
+
+            <RadioGroup
+                android:id="@+id/rg_loop_mode"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="vertical"
+                android:layout_marginTop="6dp">
+
+                <RadioButton
+                    android:id="@+id/rb_infinite"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="무한 반복 (정지 버튼을 누를 때까지)"
+                    android:textColor="#CBD5E1"
+                    android:textSize="13sp"
+                    android:checked="true" />
+
+                <LinearLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:orientation="horizontal"
+                    android:gravity="center_vertical">
+
+                    <RadioButton
+                        android:id="@+id/rb_count"
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="횟수 지정: "
+                        android:textColor="#CBD5E1"
+                        android:textSize="13sp" />
+
+                    <EditText
+                        android:id="@+id/et_loop_count"
+                        android:layout_width="80dp"
+                        android:layout_height="38dp"
+                        android:background="#0B0F19"
+                        android:textColor="#38BDF8"
+                        android:text="100"
+                        android:inputType="number"
+                        android:gravity="center"
+                        android:textSize="13sp" />
+
+                    <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:text="회 실행 후 자동 정지"
+                        android:textColor="#94A3B8"
+                        android:textSize="12sp"
+                        android:layout_marginStart="8dp" />
+                </LinearLayout>
+            </RadioGroup>
+
+            <CheckBox
+                android:id="@+id/cb_antiban"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="오토 탐지 방지 (좌표 ±8px / 시간 랜덤 편차)"
+                android:textColor="#CBD5E1"
+                android:textSize="13sp"
+                android:checked="true"
+                android:layout_marginTop="12dp" />
+        </LinearLayout>
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:background="#151C2C"
+            android:padding="16dp"
+            android:layout_marginBottom="20dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="🔒 안드로이드 필수 권한 (2가지)"
+                android:textColor="#F8FAFC"
+                android:textSize="15sp"
+                android:textStyle="bold" />
+
+            <Button
+                android:id="@+id/btn_grant_overlay"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="1. 다른 앱 위에 표시 권한 허용"
+                android:layout_marginTop="10dp"
+                android:backgroundTint="#4F46E5" />
+
+            <Button
+                android:id="@+id/btn_grant_accessibility"
+                android:layout_width="match_parent"
+                android:layout_height="44dp"
+                android:text="2. 접근성 서비스 제스처 주입 허용"
+                android:layout_marginTop="8dp"
+                android:backgroundTint="#0D9488" />
+        </LinearLayout>
+
+        <Button
+            android:id="@+id/btn_start_overlay"
+            android:layout_width="match_parent"
+            android:layout_height="56dp"
+            android:text="설정 저장 및 플로팅 오버레이 시작"
+            android:textSize="16sp"
+            android:textStyle="bold"
+            android:backgroundTint="#16A34A"
+            android:layout_marginBottom="24dp" />
+
     </LinearLayout>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1" />
-
-    <Button
-        android:id="@+id/btn_start_overlay"
-        android:layout_width="match_parent"
-        android:layout_height="60dp"
-        android:text="플로팅 위젯 시작하기"
-        android:textSize="16sp"
-        android:textStyle="bold"
-        android:backgroundTint="#16A34A" />
-
-</LinearLayout>`
+</ScrollView>`
   );
 
   layoutFolder?.file(
@@ -413,7 +633,7 @@ dependencies {
     android:layout_width="wrap_content"
     android:layout_height="wrap_content"
     android:orientation="vertical"
-    android:background="#E60F172A"
+    android:background="#E60B0F19"
     android:padding="6dp"
     android:gravity="center_horizontal">
 
@@ -444,6 +664,15 @@ dependencies {
         android:contentDescription="Add Target" />
 
     <ImageButton
+        android:id="@+id/btn_settings"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="4dp"
+        android:src="@android:drawable/ic_menu_manage"
+        android:backgroundTint="#0F766E"
+        android:contentDescription="Settings" />
+
+    <ImageButton
         android:id="@+id/btn_clear_targets"
         android:layout_width="44dp"
         android:layout_height="44dp"
@@ -460,6 +689,152 @@ dependencies {
         android:src="@android:drawable/ic_menu_close_clear_cancel"
         android:backgroundTint="#E11D48"
         android:contentDescription="Close" />
+
+</LinearLayout>`
+  );
+
+  layoutFolder?.file(
+    'layout_floating_settings_dialog.xml',
+    `<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/dialog_root"
+    android:layout_width="280dp"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#FA0B0F19"
+    android:padding="16dp"
+    android:elevation="12dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:text="⚡ 매크로 간편 설정"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            android:textStyle="bold" />
+
+        <ImageButton
+            android:id="@+id/btn_dialog_close"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:src="@android:drawable/ic_menu_close_clear_cancel"
+            android:background="?android:attr/selectableItemBackgroundBorderless"
+            android:tint="#94A3B8" />
+    </LinearLayout>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#334155"
+        android:layout_marginVertical="10dp" />
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="클릭 주기 (ms)"
+        android:textColor="#CBD5E1"
+        android:textSize="12sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:layout_marginTop="4dp">
+
+        <EditText
+            android:id="@+id/dialog_et_interval"
+            android:layout_width="0dp"
+            android:layout_height="38dp"
+            android:layout_weight="1"
+            android:background="#151C2C"
+            android:textColor="#38BDF8"
+            android:inputType="number"
+            android:paddingHorizontal="10dp"
+            android:textSize="14sp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="ms"
+            android:textColor="#94A3B8"
+            android:textSize="12sp"
+            android:layout_marginStart="8dp" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:layout_marginTop="6dp">
+
+        <Button
+            android:id="@+id/dialog_btn_100ms"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:text="0.1초"
+            android:textSize="10sp"
+            android:backgroundTint="#1E293B" />
+
+        <Button
+            android:id="@+id/dialog_btn_1s"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="1초"
+            android:textSize="10sp"
+            android:backgroundTint="#1E293B" />
+
+        <Button
+            android:id="@+id/dialog_btn_3s"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="3초"
+            android:textSize="10sp"
+            android:backgroundTint="#4F46E5" />
+
+        <Button
+            android:id="@+id/dialog_btn_5s"
+            android:layout_width="0dp"
+            android:layout_height="32dp"
+            android:layout_weight="1"
+            android:layout_marginStart="4dp"
+            android:text="5초"
+            android:textSize="10sp"
+            android:backgroundTint="#1E293B" />
+    </LinearLayout>
+
+    <CheckBox
+        android:id="@+id/dialog_cb_antiban"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="오토 방지 랜덤 편차 (±8px)"
+        android:textColor="#CBD5E1"
+        android:textSize="12sp"
+        android:checked="true"
+        android:layout_marginTop="8dp" />
+
+    <Button
+        android:id="@+id/dialog_btn_apply"
+        android:layout_width="match_parent"
+        android:layout_height="40dp"
+        android:text="설정 적용하기"
+        android:textSize="13sp"
+        android:textStyle="bold"
+        android:backgroundTint="#16A34A"
+        android:layout_marginTop="12dp" />
 
 </LinearLayout>`
   );
@@ -490,6 +865,67 @@ dependencies {
 
   // Kotlin Code files
   const javaFolder = mainFolder?.folder('java')?.folder('com')?.folder('example')?.folder('overlaymacro');
+
+  javaFolder?.file(
+    'MacroConfig.kt',
+    `package com.example.overlaymacro
+
+import android.content.Context
+import android.content.SharedPreferences
+
+data class MacroSettings(
+    var clickIntervalMs: Long = 3000L,
+    var pressDurationMs: Long = 50L,
+    var swipeDurationMs: Long = 320L,
+    var isInfiniteLoop: Boolean = true,
+    var targetLoopCount: Int = 100,
+    var isAntiBanEnabled: Boolean = true,
+    var antiBanOffsetPx: Int = 8,
+    var activePresetName: String = "정해진 초마다 클릭"
+)
+
+object MacroConfigManager {
+    private const val PREF_NAME = "overlay_macro_prefs"
+    private const val KEY_INTERVAL = "key_interval"
+    private const val KEY_DURATION = "key_duration"
+    private const val KEY_SWIPE_DURATION = "key_swipe_duration"
+    private const val KEY_INFINITE = "key_infinite"
+    private const val KEY_LOOP_COUNT = "key_loop_count"
+    private const val KEY_ANTI_BAN = "key_anti_ban"
+    private const val KEY_OFFSET_PX = "key_offset_px"
+    private const val KEY_PRESET = "key_preset"
+
+    fun saveSettings(context: Context, settings: MacroSettings) {
+        val prefs: SharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        prefs.edit().apply {
+            putLong(KEY_INTERVAL, settings.clickIntervalMs)
+            putLong(KEY_DURATION, settings.pressDurationMs)
+            putLong(KEY_SWIPE_DURATION, settings.swipeDurationMs)
+            putBoolean(KEY_INFINITE, settings.isInfiniteLoop)
+            putInt(KEY_LOOP_COUNT, settings.targetLoopCount)
+            putBoolean(KEY_ANTI_BAN, settings.isAntiBanEnabled)
+            putInt(KEY_OFFSET_PX, settings.antiBanOffsetPx)
+            putString(KEY_PRESET, settings.activePresetName)
+            apply()
+        }
+    }
+
+    fun loadSettings(context: Context): MacroSettings {
+        val prefs: SharedPreferences = context.getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
+        return MacroSettings(
+            clickIntervalMs = prefs.getLong(KEY_INTERVAL, 3000L),
+            pressDurationMs = prefs.getLong(KEY_DURATION, 50L),
+            swipeDurationMs = prefs.getLong(KEY_SWIPE_DURATION, 320L),
+            isInfiniteLoop = prefs.getBoolean(KEY_INFINITE, true),
+            targetLoopCount = prefs.getInt(KEY_LOOP_COUNT, 100),
+            isAntiBanEnabled = prefs.getBoolean(KEY_ANTI_BAN, true),
+            antiBanOffsetPx = prefs.getInt(KEY_OFFSET_PX, 8),
+            activePresetName = prefs.getString(KEY_PRESET, "정해진 초마다 클릭") ?: "정해진 초마다 클릭"
+        )
+    }
+}
+`
+  );
 
   javaFolder?.file(
     'MacroAction.kt',
@@ -542,24 +978,32 @@ import android.view.LayoutInflater
 import android.view.MotionEvent
 import android.view.View
 import android.view.WindowManager
+import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.ImageButton
 import android.widget.TextView
 import android.widget.Toast
 import androidx.core.app.NotificationCompat
+import kotlin.random.Random
 
 class FloatingOverlayService : Service() {
 
     private lateinit var windowManager: WindowManager
     private lateinit var floatingView: View
     private lateinit var floatingParams: WindowManager.LayoutParams
+    private var settingsDialogView: View? = null
+    private var settingsDialogParams: WindowManager.LayoutParams? = null
     private val targetPins = mutableListOf<View>()
     private var isPlaying = false
+    private lateinit var currentSettings: MacroSettings
 
     override fun onBind(intent: Intent?): IBinder? = null
 
     override fun onCreate() {
         super.onCreate()
         windowManager = getSystemService(Context.WINDOW_SERVICE) as WindowManager
+        currentSettings = MacroConfigManager.loadSettings(this)
 
         startForegroundNotification()
         setupFloatingToolbar()
@@ -578,7 +1022,7 @@ class FloatingOverlayService : Service() {
 
         val notification: Notification = NotificationCompat.Builder(this, channelId)
             .setContentTitle("Overlay Macro 활성화됨")
-            .setContentText("다른 앱 위에 플로팅 위젯이 표시 중입니다.")
+            .setContentText("클릭 주기: \${currentSettings.clickIntervalMs}ms")
             .setSmallIcon(android.R.drawable.ic_media_play)
             .build()
 
@@ -616,6 +1060,7 @@ class FloatingOverlayService : Service() {
         val btnDrag = floatingView.findViewById<View>(R.id.btn_drag)
         val btnPlay = floatingView.findViewById<ImageButton>(R.id.btn_play_pause)
         val btnAddTarget = floatingView.findViewById<ImageButton>(R.id.btn_add_target)
+        val btnSettings = floatingView.findViewById<ImageButton>(R.id.btn_settings)
         val btnClear = floatingView.findViewById<ImageButton>(R.id.btn_clear_targets)
         val btnClose = floatingView.findViewById<ImageButton>(R.id.btn_close)
 
@@ -647,6 +1092,10 @@ class FloatingOverlayService : Service() {
             addTargetPin()
         }
 
+        btnSettings.setOnClickListener {
+            toggleFloatingSettingsDialog()
+        }
+
         btnPlay.setOnClickListener {
             val service = MacroAccessibilityService.instance
             if (service == null) {
@@ -654,14 +1103,42 @@ class FloatingOverlayService : Service() {
                 return@setOnClickListener
             }
 
+            if (targetPins.isEmpty()) {
+                Toast.makeText(this, "먼저 [+] 버튼을 눌러 타깃 핀을 추가하세요!", Toast.LENGTH_SHORT).show()
+                return@setOnClickListener
+            }
+
             isPlaying = !isPlaying
             if (isPlaying) {
                 btnPlay.setImageResource(android.R.drawable.ic_media_pause)
-                service.startMacroExecution()
-                Toast.makeText(this, "매크로 시작됨", Toast.LENGTH_SHORT).show()
+                btnPlay.setBackgroundColor(0xFFD97706.toInt())
+
+                val actions = targetPins.map { pinView ->
+                    val location = IntArray(2)
+                    pinView.getLocationOnScreen(location)
+                    var centerX = location[0] + (pinView.width / 2f)
+                    var centerY = location[1] + (pinView.height / 2f)
+
+                    if (currentSettings.isAntiBanEnabled) {
+                        val offset = currentSettings.antiBanOffsetPx
+                        centerX += Random.nextInt(-offset, offset + 1)
+                        centerY += Random.nextInt(-offset, offset + 1)
+                    }
+
+                    MacroAction.Tap(
+                        x = centerX,
+                        y = centerY,
+                        durationMs = currentSettings.pressDurationMs,
+                        delayAfterMs = currentSettings.clickIntervalMs
+                    )
+                }
+
+                service.startMacro(actions)
+                Toast.makeText(this, "매크로 시작 (\${currentSettings.clickIntervalMs}ms 주기)", Toast.LENGTH_SHORT).show()
             } else {
                 btnPlay.setImageResource(android.R.drawable.ic_media_play)
-                service.stopMacroExecution()
+                btnPlay.setBackgroundColor(0xFF16A34A.toInt())
+                service.stopMacro()
                 Toast.makeText(this, "매크로 일시정지", Toast.LENGTH_SHORT).show()
             }
         }
@@ -672,7 +1149,7 @@ class FloatingOverlayService : Service() {
             }
             targetPins.clear()
             isPlaying = false
-            MacroAccessibilityService.instance?.stopMacroExecution()
+            MacroAccessibilityService.instance?.stopMacro()
             btnPlay.setImageResource(android.R.drawable.ic_media_play)
             Toast.makeText(this, "타깃 핀 초기화", Toast.LENGTH_SHORT).show()
         }
@@ -680,6 +1157,69 @@ class FloatingOverlayService : Service() {
         btnClose.setOnClickListener {
             stopSelf()
         }
+    }
+
+    private fun toggleFloatingSettingsDialog() {
+        if (settingsDialogView != null) {
+            closeSettingsDialog()
+            return
+        }
+
+        val overlayType = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+            WindowManager.LayoutParams.TYPE_APPLICATION_OVERLAY
+        } else {
+            @Suppress("DEPRECATION")
+            WindowManager.LayoutParams.TYPE_PHONE
+        }
+
+        val dialogView = LayoutInflater.from(this).inflate(R.layout.layout_floating_settings_dialog, null)
+        val params = WindowManager.LayoutParams(
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            WindowManager.LayoutParams.WRAP_CONTENT,
+            overlayType,
+            WindowManager.LayoutParams.FLAG_NOT_TOUCH_MODAL or
+                    WindowManager.LayoutParams.FLAG_WATCH_OUTSIDE_TOUCH,
+            PixelFormat.TRANSLUCENT
+        ).apply {
+            gravity = Gravity.CENTER
+        }
+
+        val etInterval = dialogView.findViewById<EditText>(R.id.dialog_et_interval)
+        val cbAntiBan = dialogView.findViewById<CheckBox>(R.id.dialog_cb_antiban)
+
+        etInterval.setText(currentSettings.clickIntervalMs.toString())
+        cbAntiBan.isChecked = currentSettings.isAntiBanEnabled
+
+        dialogView.findViewById<Button>(R.id.dialog_btn_100ms).setOnClickListener { etInterval.setText("100") }
+        dialogView.findViewById<Button>(R.id.dialog_btn_1s).setOnClickListener { etInterval.setText("1000") }
+        dialogView.findViewById<Button>(R.id.dialog_btn_3s).setOnClickListener { etInterval.setText("3000") }
+        dialogView.findViewById<Button>(R.id.dialog_btn_5s).setOnClickListener { etInterval.setText("5000") }
+
+        dialogView.findViewById<View>(R.id.btn_dialog_close).setOnClickListener {
+            closeSettingsDialog()
+        }
+
+        dialogView.findViewById<Button>(R.id.dialog_btn_apply).setOnClickListener {
+            val newInterval = etInterval.text.toString().toLongOrNull() ?: currentSettings.clickIntervalMs
+            currentSettings.clickIntervalMs = newInterval
+            currentSettings.isAntiBanEnabled = cbAntiBan.isChecked
+
+            MacroConfigManager.saveSettings(this, currentSettings)
+            Toast.makeText(this, "설정 변경됨: \${newInterval}ms 주기", Toast.LENGTH_SHORT).show()
+            closeSettingsDialog()
+        }
+
+        windowManager.addView(dialogView, params)
+        settingsDialogView = dialogView
+        settingsDialogParams = params
+    }
+
+    private fun closeSettingsDialog() {
+        settingsDialogView?.let {
+            try { windowManager.removeView(it) } catch (_: Exception) {}
+        }
+        settingsDialogView = null
+        settingsDialogParams = null
     }
 
     private fun addTargetPin() {
@@ -734,12 +1274,13 @@ class FloatingOverlayService : Service() {
 
         windowManager.addView(pinView, pinParams)
         targetPins.add(pinView)
-        Toast.makeText(this, "타깃 핀 #$num 생성됨", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, "타깃 핀 #\$num 생성됨", Toast.LENGTH_SHORT).show()
     }
 
     override fun onDestroy() {
         super.onDestroy()
-        MacroAccessibilityService.instance?.stopMacroExecution()
+        MacroAccessibilityService.instance?.stopMacro()
+        closeSettingsDialog()
         targetPins.forEach { try { windowManager.removeView(it) } catch (_: Exception) {} }
         targetPins.clear()
         if (::floatingView.isInitialized) {
@@ -761,19 +1302,62 @@ import android.os.Build
 import android.os.Bundle
 import android.provider.Settings
 import android.widget.Button
+import android.widget.CheckBox
+import android.widget.EditText
+import android.widget.RadioButton
+import android.widget.RadioGroup
 import android.widget.Toast
 
 class MainActivity : Activity() {
+
+    private lateinit var etInterval: EditText
+    private lateinit var etDuration: EditText
+    private lateinit var rgLoopMode: RadioGroup
+    private lateinit var rbInfinite: RadioButton
+    private lateinit var rbCount: RadioButton
+    private lateinit var etLoopCount: EditText
+    private lateinit var cbAntiBan: CheckBox
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        val btnGrantOverlay = findViewById<Button>(R.id.btn_grant_overlay)
-        val btnGrantAccessibility = findViewById<Button>(R.id.btn_grant_accessibility)
-        val btnStart = findViewById<Button>(R.id.btn_start_overlay)
+        initViews()
+        loadSavedConfig()
+        setupListeners()
+    }
 
-        btnGrantOverlay.setOnClickListener {
+    private fun initViews() {
+        etInterval = findViewById(R.id.et_interval_ms)
+        etDuration = findViewById(R.id.et_duration_ms)
+        rgLoopMode = findViewById(R.id.rg_loop_mode)
+        rbInfinite = findViewById(R.id.rb_infinite)
+        rbCount = findViewById(R.id.rb_count)
+        etLoopCount = findViewById(R.id.et_loop_count)
+        cbAntiBan = findViewById(R.id.cb_antiban)
+    }
+
+    private fun loadSavedConfig() {
+        val config = MacroConfigManager.loadSettings(this)
+        etInterval.setText(config.clickIntervalMs.toString())
+        etDuration.setText(config.pressDurationMs.toString())
+        cbAntiBan.isChecked = config.isAntiBanEnabled
+        etLoopCount.setText(config.targetLoopCount.toString())
+
+        if (config.isInfiniteLoop) {
+            rbInfinite.isChecked = true
+        } else {
+            rbCount.isChecked = true
+        }
+    }
+
+    private fun setupListeners() {
+        findViewById<Button>(R.id.btn_chip_100ms).setOnClickListener { etInterval.setText("100") }
+        findViewById<Button>(R.id.btn_chip_1s).setOnClickListener { etInterval.setText("1000") }
+        findViewById<Button>(R.id.btn_chip_3s).setOnClickListener { etInterval.setText("3000") }
+        findViewById<Button>(R.id.btn_chip_5s).setOnClickListener { etInterval.setText("5000") }
+
+        findViewById<Button>(R.id.btn_grant_overlay).setOnClickListener {
             if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
                 if (!Settings.canDrawOverlays(this)) {
                     val intent = Intent(
@@ -787,15 +1371,33 @@ class MainActivity : Activity() {
             }
         }
 
-        btnGrantAccessibility.setOnClickListener {
+        findViewById<Button>(R.id.btn_grant_accessibility).setOnClickListener {
             val intent = Intent(Settings.ACTION_ACCESSIBILITY_SETTINGS)
             startActivity(intent)
             Toast.makeText(this, "목록에서 'Overlay Macro' 서비스를 찾아 켜주세요.", Toast.LENGTH_LONG).show()
         }
 
-        btnStart.setOnClickListener {
+        findViewById<Button>(R.id.btn_start_overlay).setOnClickListener {
+            saveCurrentConfig()
             startOverlayService()
         }
+    }
+
+    private fun saveCurrentConfig() {
+        val intervalMs = etInterval.text.toString().toLongOrNull() ?: 3000L
+        val durationMs = etDuration.text.toString().toLongOrNull() ?: 50L
+        val isInfinite = rbInfinite.isChecked
+        val loopCount = etLoopCount.text.toString().toIntOrNull() ?: 100
+        val antiBan = cbAntiBan.isChecked
+
+        val newSettings = MacroSettings(
+            clickIntervalMs = intervalMs,
+            pressDurationMs = durationMs,
+            isInfiniteLoop = isInfinite,
+            targetLoopCount = loopCount,
+            isAntiBanEnabled = antiBan
+        )
+        MacroConfigManager.saveSettings(this, newSettings)
     }
 
     private fun startOverlayService() {
@@ -816,7 +1418,7 @@ class MainActivity : Activity() {
             startService(intent)
         }
 
-        Toast.makeText(this, "플로팅 오버레이가 실행되었습니다! 홈 화면이나 게임으로 이동하세요.", Toast.LENGTH_LONG).show()
+        Toast.makeText(this, "설정 적용 완료! 화면 위에 플로팅 위젯이 떴습니다.", Toast.LENGTH_LONG).show()
         finish()
     }
 }

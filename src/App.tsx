@@ -17,6 +17,7 @@ import { MacroSequenceEditor } from './components/MacroSequenceEditor';
 import { AndroidCodeModal } from './components/AndroidCodeModal';
 import { AiMacroGeneratorModal } from './components/AiMacroGeneratorModal';
 import { RealPhoneRunGuideModal } from './components/RealPhoneRunGuideModal';
+import { NewMacroWizardModal } from './components/NewMacroWizardModal';
 import { 
   Sparkles, 
   Layers, 
@@ -28,7 +29,8 @@ import {
   Zap, 
   SlidersHorizontal,
   HelpCircle,
-  AlertCircle
+  AlertCircle,
+  Plus
 } from 'lucide-react';
 
 export default function App() {
@@ -38,6 +40,7 @@ export default function App() {
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState(false);
   const [isRealPhoneGuideOpen, setIsRealPhoneGuideOpen] = useState(false);
+  const [isNewMacroWizardOpen, setIsNewMacroWizardOpen] = useState(false);
 
   // Execution engine state
   const [stats, setStats] = useState<ExecutionStats>({
@@ -441,6 +444,7 @@ export default function App() {
           stopExecution();
           setCurrentScript(p);
         }}
+        onOpenNewMacroWizard={() => setIsNewMacroWizardOpen(true)}
         onOpenCodeModal={() => setIsCodeModalOpen(true)}
         onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
         onOpenRealPhoneGuide={() => setIsRealPhoneGuideOpen(true)}
@@ -480,8 +484,18 @@ export default function App() {
             </p>
           </div>
 
-          {/* Quick Preset Selector Buttons */}
-          <div className="flex flex-wrap items-center gap-1.5">
+          {/* Create New Macro Primary CTA & Preset Buttons */}
+          <div className="flex flex-wrap items-center gap-2">
+            <button
+              onClick={() => setIsNewMacroWizardOpen(true)}
+              className="px-4 py-2 rounded-xl text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 shadow-lg shadow-emerald-950/60 active:scale-98 transition-all flex items-center gap-1.5"
+            >
+              <Plus className="w-4 h-4" />
+              <span>새 매크로 생성하기</span>
+            </button>
+
+            <div className="h-6 w-px bg-slate-800 mx-1 hidden sm:block" />
+
             {PRESET_SCRIPTS.map((preset) => (
               <button
                 key={preset.id}
@@ -552,6 +566,7 @@ export default function App() {
               onExportJson={handleExportJson}
               onImportJson={handleImportJson}
               onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
+              onOpenNewMacroWizard={() => setIsNewMacroWizardOpen(true)}
             />
           </div>
         </div>
@@ -671,6 +686,22 @@ export default function App() {
         onOpenCodeModal={() => {
           setIsRealPhoneGuideOpen(false);
           setIsCodeModalOpen(true);
+        }}
+      />
+
+      {/* New Macro Creation Wizard Modal */}
+      <NewMacroWizardModal
+        isOpen={isNewMacroWizardOpen}
+        onClose={() => setIsNewMacroWizardOpen(false)}
+        onCreateMacro={(newScript) => {
+          stopExecution();
+          setCurrentScript(newScript);
+        }}
+        onStartRecordMode={() => {
+          setIsRecordMode(true);
+        }}
+        onOpenAiGenerator={() => {
+          setIsAiGeneratorOpen(true);
         }}
       />
 

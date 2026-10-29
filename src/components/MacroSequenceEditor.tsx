@@ -39,6 +39,7 @@ interface MacroSequenceEditorProps {
   onExportJson: () => void;
   onImportJson: (e: React.ChangeEvent<HTMLInputElement>) => void;
   onOpenAiGenerator: () => void;
+  onOpenNewMacroWizard: () => void;
 }
 
 export const MacroSequenceEditor: React.FC<MacroSequenceEditorProps> = ({
@@ -54,6 +55,7 @@ export const MacroSequenceEditor: React.FC<MacroSequenceEditorProps> = ({
   onExportJson,
   onImportJson,
   onOpenAiGenerator,
+  onOpenNewMacroWizard,
 }) => {
   const fileInputRef = React.useRef<HTMLInputElement>(null);
 
@@ -117,15 +119,23 @@ export const MacroSequenceEditor: React.FC<MacroSequenceEditorProps> = ({
             />
           </div>
 
-          {/* Quick Actions (AI Generator, JSON export/import) */}
+          {/* Quick Actions (Create New Macro, AI Generator, JSON export/import) */}
           <div className="flex items-center gap-1.5 shrink-0">
+            <button
+              onClick={onOpenNewMacroWizard}
+              className="px-2.5 py-1.5 text-xs font-bold bg-emerald-600 hover:bg-emerald-500 text-white rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
+              title="새로운 매크로 생성 마법사 열기"
+            >
+              <Plus className="w-3.5 h-3.5" />
+              <span>새 매크로 생성</span>
+            </button>
             <button
               onClick={onOpenAiGenerator}
               className="px-2.5 py-1.5 text-xs font-semibold bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white rounded-lg flex items-center gap-1.5 shadow-sm transition-all"
               title="자연어로 매크로 자동 생성"
             >
               <Sparkles className="w-3.5 h-3.5" />
-              <span>AI 매크로 생성</span>
+              <span>AI 자동 생성</span>
             </button>
             <button
               onClick={onExportJson}
