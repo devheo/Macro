@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/floating_root"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:orientation="vertical"
+    android:background="#E60F172A"
+    android:padding="6dp"
+    android:gravity="center_horizontal">
+
+    <!-- 드래그 핸들 (위치 이동용) -->
+    <ImageView
+        android:id="@+id/btn_drag"
+        android:layout_width="32dp"
+        android:layout_height="24dp"
+        android:src="@android:drawable/ic_menu_sort_by_size"
+        android:tint="#94A3B8"
+        android:contentDescription="Drag" />
+
+    <!-- 재생 / 일시정지 버튼 -->
+    <ImageButton
+        android:id="@+id/btn_play_pause"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="4dp"
+        android:src="@android:drawable/ic_media_play"
+        android:backgroundTint="#16A34A"
+        android:contentDescription="Play/Pause" />
+
+    <!-- 타깃 핀 추가 버튼 (+) -->
+    <ImageButton
+        android:id="@+id/btn_add_target"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="4dp"
+        android:src="@android:drawable/ic_input_add"
+        android:backgroundTint="#4F46E5"
+        android:contentDescription="Add Target" />
+
+    <!-- 핀 모두 비우기 버튼 -->
+    <ImageButton
+        android:id="@+id/btn_clear_targets"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="4dp"
+        android:src="@android:drawable/ic_menu_delete"
+        android:backgroundTint="#334155"
+        android:contentDescription="Clear" />
+
+    <!-- 닫기 버튼 -->
+    <ImageButton
+        android:id="@+id/btn_close"
+        android:layout_width="44dp"
+        android:layout_height="44dp"
+        android:layout_marginTop="4dp"
+        android:src="@android:drawable/ic_menu_close_clear_cancel"
+        android:backgroundTint="#E11D48"
+        android:contentDescription="Close" />
+
+</LinearLayout>

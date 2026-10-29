@@ -8,6 +8,7 @@ interface HeaderProps {
   onSelectPreset: (preset: MacroScript) => void;
   onOpenCodeModal: () => void;
   onOpenAiGenerator: () => void;
+  onOpenRealPhoneGuide: () => void;
   onScrollToSection: (sectionId: string) => void;
 }
 
@@ -16,6 +17,7 @@ export const Header: React.FC<HeaderProps> = ({
   onSelectPreset,
   onOpenCodeModal,
   onOpenAiGenerator,
+  onOpenRealPhoneGuide,
   onScrollToSection,
 }) => {
   return (
@@ -80,11 +82,19 @@ export const Header: React.FC<HeaderProps> = ({
         </button>
 
         <button
+          onClick={onOpenRealPhoneGuide}
+          className="text-amber-400 hover:text-amber-300 transition-colors flex items-center gap-1 whitespace-nowrap bg-amber-500/10 px-2 py-1 rounded-lg border border-amber-500/20"
+          title="웹과 실제 스마트폰의 차이 및 실제 기기 구동 3가지 방법"
+        >
+          <span>📱 실제 안드로이드 폰 실행법</span>
+        </button>
+
+        <button
           onClick={onOpenCodeModal}
           className="hover:text-teal-300 text-slate-300 transition-colors flex items-center gap-1 whitespace-nowrap"
         >
           <BookOpen className="w-3.5 h-3.5" />
-          <span>안드로이드 구현 원리</span>
+          <span>안드로이드 소스코드</span>
         </button>
       </nav>
 
@@ -95,7 +105,7 @@ export const Header: React.FC<HeaderProps> = ({
           className="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-500 active:scale-98 rounded-xl shadow-md shadow-indigo-950/60 transition-all flex items-center gap-2 whitespace-nowrap"
         >
           <Code className="w-3.5 h-3.5" />
-          <span>안드로이드 소스코드 내보내기</span>
+          <span>안드로이드 프로젝트 (.ZIP 다운로드)</span>
         </button>
       </div>
     </header>

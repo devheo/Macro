@@ -7,6 +7,7 @@ import {
   generateAccessibilityConfigXml,
   generateAdbShellScript,
 } from '../utils/codeGenerators';
+import { downloadAndroidProjectZip } from '../utils/androidProjectZip';
 import { 
   X, 
   Copy, 
@@ -16,7 +17,9 @@ import {
   Terminal, 
   Layers, 
   ShieldCheck, 
-  ExternalLink 
+  ExternalLink,
+  FolderArchive,
+  FolderTree
 } from 'lucide-react';
 
 interface AndroidCodeModalProps {
@@ -34,8 +37,20 @@ export const AndroidCodeModal: React.FC<AndroidCodeModalProps> = ({
     'overview' | 'accessibility' | 'overlay' | 'manifest' | 'config' | 'adb'
   >('overview');
   const [copied, setCopied] = useState(false);
+  const [isZipping, setIsZipping] = useState(false);
 
   if (!isOpen) return null;
+
+  const handleDownloadFullZip = async () => {
+    setIsZipping(true);
+    try {
+      await downloadAndroidProjectZip(script);
+    } catch (e) {
+      alert('ZIP 파일 생성 중 오류가 발생했습니다.');
+    } finally {
+      setIsZipping(false);
+    }
+  };
 
   const getCodeForTab = () => {
     switch (activeTab) {
@@ -90,27 +105,39 @@ export const AndroidCodeModal: React.FC<AndroidCodeModalProps> = ({
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/80 backdrop-blur-sm animate-in fade-in duration-200">
       <div className="relative w-full max-w-4xl h-[85vh] bg-slate-900 border border-slate-700/80 rounded-2xl shadow-2xl flex flex-col overflow-hidden text-slate-200">
         {/* Modal Top Header */}
-        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between">
+        <div className="p-4 border-b border-slate-800 bg-slate-950 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
             <div className="p-2 rounded-xl bg-indigo-500/10 border border-indigo-500/20 text-indigo-400">
               <Code2 className="w-5 h-5" />
             </div>
             <div>
               <h2 className="text-base font-bold text-white">
-                안드로이드 네이티브 앱 제작 가이드 & 소스코드
+                안드로이드 스튜디오 프로젝트 (Android Studio Project)
               </h2>
               <p className="text-xs text-slate-400 mt-0.5">
-                앱 위에 띄우는 오버레이(WindowManager) 및 제스처 주입(AccessibilityService) Kotlin 구현체
+                다른 앱 위에 항상 떠 있는 플로팅 위젯 + 루팅 없는 접근성 제스처 매크로 전체 프로젝트
               </p>
             </div>
           </div>
 
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
-          >
-            <X className="w-5 h-5" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleDownloadFullZip}
+              disabled={isZipping}
+              className="px-3.5 py-1.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-bold flex items-center gap-1.5 shadow-md shadow-emerald-950/60 transition-all shrink-0"
+              title="Android Studio에서 바로 열 수 있는 전체 프로젝트 압축파일 다운로드"
+            >
+              <FolderArchive className="w-4 h-4" />
+              <span>{isZipping ? '압축 중...' : '프로젝트 전체 다운로드 (.ZIP)'}</span>
+            </button>
+
+            <button
+              onClick={onClose}
+              className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         {/* Tab Navigation */}
@@ -123,7 +150,7 @@ export const AndroidCodeModal: React.FC<AndroidCodeModalProps> = ({
                 : 'text-slate-400 hover:text-slate-200'
             }`}
           >
-            01. 구현 원리 및 아키텍처
+            01. 구조 및 빌드 가이드
           </button>
           <button
             onClick={() => setActiveTab('accessibility')}

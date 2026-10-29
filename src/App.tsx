@@ -16,6 +16,7 @@ import { PhoneSimulator } from './components/PhoneSimulator';
 import { MacroSequenceEditor } from './components/MacroSequenceEditor';
 import { AndroidCodeModal } from './components/AndroidCodeModal';
 import { AiMacroGeneratorModal } from './components/AiMacroGeneratorModal';
+import { RealPhoneRunGuideModal } from './components/RealPhoneRunGuideModal';
 import { 
   Sparkles, 
   Layers, 
@@ -25,7 +26,9 @@ import {
   Play, 
   Code, 
   Zap, 
-  SlidersHorizontal 
+  SlidersHorizontal,
+  HelpCircle,
+  AlertCircle
 } from 'lucide-react';
 
 export default function App() {
@@ -34,6 +37,7 @@ export default function App() {
   const [isRecordMode, setIsRecordMode] = useState(false);
   const [isCodeModalOpen, setIsCodeModalOpen] = useState(false);
   const [isAiGeneratorOpen, setIsAiGeneratorOpen] = useState(false);
+  const [isRealPhoneGuideOpen, setIsRealPhoneGuideOpen] = useState(false);
 
   // Execution engine state
   const [stats, setStats] = useState<ExecutionStats>({
@@ -439,11 +443,28 @@ export default function App() {
         }}
         onOpenCodeModal={() => setIsCodeModalOpen(true)}
         onOpenAiGenerator={() => setIsAiGeneratorOpen(true)}
+        onOpenRealPhoneGuide={() => setIsRealPhoneGuideOpen(true)}
         onScrollToSection={scrollToSection}
       />
 
       {/* Main Workspace Body */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 lg:px-6 py-6 flex flex-col gap-6">
+        {/* Real Android Execution Notice Banner */}
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 px-4 py-3 rounded-xl bg-amber-500/10 border border-amber-500/30 text-xs">
+          <div className="flex items-center gap-2.5 text-amber-300">
+            <AlertCircle className="w-4 h-4 shrink-0 text-amber-400" />
+            <span>
+              <strong>웹 시뮬레이터 안내:</strong> 브라우저(웹)는 안드로이드 보안상 다른 앱을 직접 클릭할 수 없습니다. 여기서 시각적으로 설정한 매크로를 <strong>실제 스마트폰에서 바로 실행하는 3가지 방법</strong>(무료 앱 연동 / ADB 스크립트 / APK 빌드)을 제공합니다.
+            </span>
+          </div>
+          <button
+            onClick={() => setIsRealPhoneGuideOpen(true)}
+            className="px-3 py-1.5 rounded-lg bg-amber-500 hover:bg-amber-400 text-slate-950 font-bold whitespace-nowrap shadow-xs transition-colors shrink-0"
+          >
+            실제 폰 실행법 보기
+          </button>
+        </div>
+
         {/* Hero Section & Quick Preset Bar */}
         <section className="flex flex-col md:flex-row md:items-center justify-between gap-4 p-5 rounded-2xl bg-gradient-to-r from-slate-900 via-slate-900 to-indigo-950/40 border border-slate-800 shadow-xl">
           <div className="space-y-1.5 max-w-2xl">
@@ -550,9 +571,9 @@ export default function App() {
 
             <button
               onClick={() => setIsCodeModalOpen(true)}
-              className="px-3.5 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md transition-colors flex items-center gap-1.5"
+              className="px-4 py-2 text-xs font-semibold bg-indigo-600 hover:bg-indigo-500 text-white rounded-xl shadow-md transition-colors flex items-center gap-1.5"
             >
-              <span>전체 소스코드 보기</span>
+              <span>안드로이드 프로젝트 열기 (.ZIP 다운로드)</span>
             </button>
           </div>
 
@@ -640,6 +661,17 @@ export default function App() {
         isOpen={isCodeModalOpen}
         onClose={() => setIsCodeModalOpen(false)}
         script={currentScript}
+      />
+
+      {/* Real Phone Run Guide Modal */}
+      <RealPhoneRunGuideModal
+        isOpen={isRealPhoneGuideOpen}
+        onClose={() => setIsRealPhoneGuideOpen(false)}
+        script={currentScript}
+        onOpenCodeModal={() => {
+          setIsRealPhoneGuideOpen(false);
+          setIsCodeModalOpen(true);
+        }}
       />
 
       {/* Natural Language AI Macro Generator Modal */}
